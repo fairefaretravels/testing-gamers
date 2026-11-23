@@ -1,0 +1,16 @@
+{
+  "name": "battlegames-e2e",
+  "private": true,
+  "scripts": {
+    "serve": "http-server . -p 8080 -c-1 --silent",
+    "cy:open": "start-server-and-test serve http://localhost:8080/sk1/index.html cypress:open",
+    "cy:run": "start-server-and-test serve http://localhost:8080/sk1/index.html cypress:run",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^13.17.0",
+    "http-server": "^14.1.1",
+    "start-server-and-test": "^2.0.8"
+  }
+}

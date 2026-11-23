@@ -1,0 +1,718 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#111006">
+<meta name="description" content="The Backrooms Horror — explore, solve puzzles, and escape in a SENSTACK ARCADE survival horror game.">
+<meta name="author" content="Saneca Mack">
+<title>The Backrooms Horror | SENSTACK ARCADE</title>
+<style>
+:root {
+  --yellow:#f4df38;
+  --dark:#100f07;
+  --panel:#19180e;
+  --white:#f2f0dc;
+  --muted:#aaa78c;
+}
+* { box-sizing:border-box; }
+html,body {
+  margin:0;width:100%;height:100%;overflow:hidden;
+  background:var(--dark);color:var(--white);
+  font-family:Arial,Helvetica,sans-serif;
+  touch-action:none;
+}
+button { font:inherit;cursor:pointer; }
+#game {
+  display:block;width:100%;height:100%;
+  position:absolute;inset:0;
+}
+#hud {
+  position:absolute;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:8px;padding:12px;pointer-events:none;
+}
+.hudbox {
+  background:#080805d9;border:1px solid #f4df3844;
+  padding:9px 12px;font-size:12px;letter-spacing:1px;
+  line-height:1.7;
+}
+.hudbox strong {color:var(--yellow);}
+#topRight {display:flex;gap:6px;pointer-events:auto;}
+.smallbtn {
+  background:#101006e8;color:var(--yellow);
+  border:1px solid #f4df3880;padding:9px 10px;
+}
+#objective {
+  position:absolute;top:78px;left:50%;transform:translateX(-50%);
+  max-width:90%;text-align:center;background:#080805c9;
+  padding:8px 12px;font-size:12px;letter-spacing:.5px;
+  border-bottom:1px solid #f4df3860;pointer-events:none;
+}
+#message {
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  max-width:85%;text-align:center;color:var(--yellow);
+  font-size:14px;line-height:1.5;letter-spacing:1px;
+  text-shadow:0 2px 5px #000;pointer-events:none;
+}
+#overlay {
+  position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;padding:22px;background:#070704bd;
+}
+.panel {
+  width:min(520px,100%);max-height:90%;overflow:auto;
+  padding:clamp(22px,5vw,42px);
+  background:linear-gradient(145deg,#201f12f7,#090905f7);
+  border:1px solid #f4df3870;
+  box-shadow:0 0 55px #000a;
+}
+.kicker {color:var(--yellow);font-size:11px;letter-spacing:4px;}
+h1 {font-size:clamp(34px,8vw,64px);line-height:.95;margin:18px 0 8px;}
+h1 span {display:block;color:var(--yellow);letter-spacing:2px;}
+h2 {color:var(--yellow);font-size:19px;}
+p {line-height:1.65;color:#d2cfb9;font-size:14px;}
+.rule {height:1px;background:#f4df383b;margin:20px 0;}
+.primary {
+  display:block;width:100%;padding:15px;margin-top:18px;
+  border:1px solid var(--yellow);background:var(--yellow);
+  color:#171606;font-weight:bold;letter-spacing:2px;
+}
+.secondary {
+  display:block;width:100%;padding:13px;margin-top:9px;
+  border:1px solid #f4df3870;background:transparent;
+  color:var(--yellow);letter-spacing:1px;
+}
+#touchControls {
+  display:none;position:absolute;bottom:max(15px,env(safe-area-inset-bottom));
+  left:0;right:0;padding:0 15px;
+  justify-content:space-between;align-items:flex-end;
+  pointer-events:none;
+}
+.pad {display:grid;grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,43px);gap:5px;}
+.touchbtn {
+  pointer-events:auto;border:1px solid #f4df3880;
+  background:#080805bb;color:var(--yellow);font-weight:bold;
+  border-radius:7px;user-select:none;-webkit-user-select:none;
+}
+.touchbtn:active {background:#f4df3855;}
+.pad .up {grid-column:2;grid-row:1;}
+.pad .left {grid-column:1;grid-row:2;}
+.pad .down {grid-column:2;grid-row:2;}
+.pad .right {grid-column:3;grid-row:2;}
+.actions {display:flex;flex-direction:column;gap:8px;}
+.actions button {width:88px;height:43px;font-size:11px;}
+#hint {
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  color:#f0eac1;font-size:10px;letter-spacing:1px;
+  text-align:center;white-space:nowrap;pointer-events:none;
+}
+.hidden {display:none!important;}
+@media (pointer:coarse) {
+  #touchControls {display:flex;}
+  #hint {bottom:123px;}
+}
+@media (max-width:420px) {
+  .hudbox {padding:7px 8px;font-size:10px;}
+  .smallbtn {padding:8px 7px;font-size:10px;}
+  #objective {top:69px;font-size:10px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after {scroll-behavior:auto!important;}
+}
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Backrooms horror game"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="hudbox">
+    <strong>THE BACKROOMS</strong><br>
+    KEYS: <span id="keys">0 / 3</span><br>
+    <span id="status">STATUS: ALONE</span>
+  </div>
+  <div id="topRight">
+    <button class="smallbtn" id="lightBtn">LIGHT: ON</button>
+    <button class="smallbtn" id="pauseBtn">PAUSE</button>
+  </div>
+</div>
+
+<div id="objective" class="hidden">FIND THREE KEYS. LOCATE THE EXIT.</div>
+<div id="message"></div>
+
+<div id="touchControls" class="hidden">
+  <div class="pad">
+    <button class="touchbtn up" data-move="up">▲</button>
+    <button class="touchbtn left" data-move="left">◀</button>
+    <button class="touchbtn down" data-move="down">▼</button>
+    <button class="touchbtn right" data-move="right">▶</button>
+  </div>
+  <div class="actions">
+    <button class="touchbtn" id="interactBtn">INTERACT</button>
+    <button class="touchbtn" id="runBtn">RUN</button>
+  </div>
+</div>
+<div id="hint" class="hidden">WASD / ARROWS TO MOVE · E TO INTERACT · SHIFT TO RUN</div>
+
+<div id="overlay">
+  <div class="panel" id="panel">
+    <div class="kicker">SENSTACK ARCADE PRESENTS</div>
+    <h1>THE <span>BACKROOMS</span></h1>
+    <div class="kicker">HORROR · SURVIVAL · PUZZLE</div>
+    <div class="rule"></div>
+    <p>You woke up somewhere you do not recognize. The lights hum. The halls keep changing. Something is moving just beyond the light.</p>
+    <p><strong>Find three keys.</strong> Reach the exit. Do not let the thing catch you.</p>
+    <p>Explore the maze, conserve your energy, and use your flashlight to see through the darkness.</p>
+    <button class="primary" id="startBtn">ENTER THE BACKROOMS</button>
+    <button class="secondary" id="controlsBtn">HOW TO PLAY</button>
+    <p style="font-size:10px;color:#aaa78c">HEADPHONES RECOMMENDED · SURVIVAL NOT GUARANTEED</p>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const $ = id => document.getElementById(id);
+const overlay = $("overlay");
+const panel = $("panel");
+const message = $("message");
+
+const TILE = 48;
+const COLS = 27;
+const ROWS = 23;
+const TOTAL_KEYS = 3;
+
+let map = [];
+let keys = [];
+let exitPoint = null;
+let player = {x:1.5,y:1.5,r:0.22,speed:2.4};
+let monster = {x:COLS-2.5,y:ROWS-2.5,active:false};
+let found = 0;
+let running = false;
+let paused = false;
+let lightOn = true;
+let elapsed = 0;
+let lastTime = 0;
+let scare = 0;
+let stamina = 100;
+let gameState = "menu";
+let audioCtx = null;
+let soundEnabled = true;
+let move = {up:false,down:false,left:false,right:false,run:false};
+let viewW = innerWidth, viewH = innerHeight;
+let flicker = 0;
+let bestTime = Number(localStorage.getItem("backroomsBestTime") || 0);
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  viewW = innerWidth;
+  viewH = innerHeight;
+  canvas.width = Math.floor(viewW*dpr);
+  canvas.height = Math.floor(viewH*dpr);
+  canvas.style.width = viewW+"px";
+  canvas.style.height = viewH+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+addEventListener("resize",resize);
+resize();
+
+function randInt(n) { return Math.floor(Math.random()*n); }
+function distance(a,b) { return Math.hypot(a.x-b.x,a.y-b.y); }
+
+function makeMaze() {
+  map = Array.from({length:ROWS},()=>Array(COLS).fill(1));
+
+  // Recursive backtracker creates connected corridors.
+  const stack = [[1,1]];
+  map[1][1] = 0;
+  while(stack.length) {
+    const [x,y] = stack[stack.length-1];
+    const dirs = [[0,-2],[2,0],[0,2],[-2,0]]
+      .sort(()=>Math.random()-.5);
+    let carved = false;
+    for(const [dx,dy] of dirs) {
+      const nx=x+dx, ny=y+dy;
+      if(nx>0 && nx<COLS-1 && ny>0 && ny<ROWS-1 && map[ny][nx]===1) {
+        map[y+dy/2][x+dx/2]=0;
+        map[ny][nx]=0;
+        stack.push([nx,ny]);
+        carved=true;
+        break;
+      }
+    }
+    if(!carved) stack.pop();
+  }
+
+  // Add a few wider open spaces to break up the maze.
+  for(let i=0;i<10;i++) {
+    const x=2+randInt(COLS-4), y=2+randInt(ROWS-4);
+    if(map[y][x]===0) {
+      for(let yy=Math.max(1,y-1);yy<=Math.min(ROWS-2,y+1);yy++)
+        for(let xx=Math.max(1,x-1);xx<=Math.min(COLS-2,x+1);xx++)
+          if(Math.random()<0.6) map[yy][xx]=0;
+    }
+  }
+}
+
+function walkable(x,y) {
+  const tx=Math.floor(x), ty=Math.floor(y);
+  return tx>=0 && ty>=0 && tx<COLS && ty<ROWS && map[ty][tx]===0;
+}
+
+function placeItems() {
+  const candidates=[];
+  for(let y=1;y<ROWS-1;y++) {
+    for(let x=1;x<COLS-1;x++) {
+      if(map[y][x]===0 && Math.hypot(x-1,y-1)>7)
+        candidates.push({x:x+.5,y:y+.5});
+    }
+  }
+  candidates.sort(()=>Math.random()-.5);
+  keys=candidates.slice(0,TOTAL_KEYS).map((p,i)=>({...p,id:i,found:false}));
+  exitPoint=candidates[TOTAL_KEYS+2] || {x:COLS-2.5,y:ROWS-2.5};
+  monster={x:COLS-2.5,y:ROWS-2.5,active:true};
+}
+
+function newGame() {
+  makeMaze();
+  player={x:1.5,y:1.5,r:.22,speed:2.4};
+  found=0;
+  elapsed=0;
+  stamina=100;
+  lightOn=true;
+  paused=false;
+  scare=0;
+  flicker=0;
+  move={up:false,down:false,left:false,right:false,run:false};
+  placeItems();
+  gameState="playing";
+  running=true;
+  overlay.classList.add("hidden");
+  $("hud").classList.remove("hidden");
+  $("objective").classList.remove("hidden");
+  $("touchControls").classList.remove("hidden");
+  $("hint").classList.remove("hidden");
+  $("lightBtn").textContent="LIGHT: ON";
+  updateHUD();
+  playTone(220,.12);
+  lastTime=performance.now();
+  requestAnimationFrame(loop);
+}
+
+function updateHUD() {
+  $("keys").textContent=found+" / "+TOTAL_KEYS;
+  $("status").textContent=monster.active?"STATUS: NOT ALONE":"STATUS: QUIET";
+  $("objective").textContent=found<TOTAL_KEYS
+    ? "FIND THE KEYS · "+(TOTAL_KEYS-found)+" REMAINING"
+    : "THE EXIT IS UNLOCKED · FIND THE EXIT";
+}
+
+function showPanel(title,subtitle,body,buttonText,callback) {
+  running=false;
+  paused=false;
+  overlay.classList.remove("hidden");
+  $("hud").classList.add("hidden");
+  $("objective").classList.add("hidden");
+  $("touchControls").classList.add("hidden");
+  $("hint").classList.add("hidden");
+  panel.innerHTML=`
+    <div class="kicker">SENSTACK ARCADE</div>
+    <h1>${title}</h1>
+    <div class="kicker">${subtitle}</div>
+    <div class="rule"></div>
+    <p>${body}</p>
+    <button class="primary" id="panelAction">${buttonText}</button>
+    <button class="secondary" id="panelMenu">MAIN MENU</button>`;
+  $("panelAction").onclick=callback;
+  $("panelMenu").onclick=mainMenu;
+}
+
+function mainMenu() {
+  running=false;
+  paused=false;
+  gameState="menu";
+  overlay.classList.remove("hidden");
+  $("hud").classList.add("hidden");
+  $("objective").classList.add("hidden");
+  $("touchControls").classList.add("hidden");
+  $("hint").classList.add("hidden");
+  panel.innerHTML=`
+    <div class="kicker">SENSTACK ARCADE PRESENTS</div>
+    <h1>THE <span>BACKROOMS</span></h1>
+    <div class="kicker">HORROR · SURVIVAL · PUZZLE</div>
+    <div class="rule"></div>
+    <p>You woke up somewhere you do not recognize. The lights hum. The halls keep changing. Something is moving just beyond the light.</p>
+    <p><strong>Find three keys.</strong> Reach the exit. Do not let the thing catch you.</p>
+    <p>Best escape time: ${bestTime ? formatTime(bestTime) : "Not recorded"}</p>
+    <button class="primary" id="startBtn">ENTER THE BACKROOMS</button>
+    <button class="secondary" id="controlsBtn">HOW TO PLAY</button>`;
+  $("startBtn").onclick=newGame;
+  $("controlsBtn").onclick=showControls;
+}
+
+function showControls() {
+  showPanel("HOW TO PLAY","SURVIVE THE MAZE",
+    "<strong>MOVE:</strong> WASD or arrow keys. On mobile, use the directional pad.<br><br>"+
+    "<strong>RUN:</strong> Hold Shift or the RUN button. Running drains stamina.<br><br>"+
+    "<strong>INTERACT:</strong> Press E or INTERACT near a key or exit.<br><br>"+
+    "<strong>FLASHLIGHT:</strong> Toggle it to see in the dark. Keep moving, and watch for the creature.",
+    "START GAME",newGame);
+}
+
+function pauseGame() {
+  if(gameState!=="playing") return;
+  paused=!paused;
+  if(paused) {
+    showPanel("PAUSED","THE HUM NEVER STOPS",
+      "Take a breath. The halls are waiting for you.",
+      "RESUME",()=> {
+        overlay.classList.add("hidden");
+        paused=false;
+        running=true;
+        lastTime=performance.now();
+        requestAnimationFrame(loop);
+      });
+  } else {
+    overlay.classList.add("hidden");
+    running=true;
+    lastTime=performance.now();
+    requestAnimationFrame(loop);
+  }
+}
+
+function toggleLight() {
+  lightOn=!lightOn;
+  $("lightBtn").textContent="LIGHT: "+(lightOn?"ON":"OFF");
+  if(lightOn) playTone(480,.045);
+}
+
+function playTone(freq,duration) {
+  if(!soundEnabled) return;
+  try {
+    audioCtx=audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.type="sine";
+    osc.frequency.value=freq;
+    gain.gain.setValueAtTime(.035,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    osc.start();osc.stop(audioCtx.currentTime+duration);
+  } catch(e) {}
+}
+
+function tryMove(nx,ny) {
+  const r=player.r;
+  if(walkable(nx-r,player.y) && walkable(nx+r,player.y)) player.x=nx;
+  if(walkable(player.x,ny-r) && walkable(player.x,ny+r)) player.y=ny;
+}
+
+function interact() {
+  if(gameState!=="playing" || paused) return;
+  const nearKey=keys.find(k=>!k.found && distance(player,k)<1.15);
+  if(nearKey) {
+    nearKey.found=true;
+    found++;
+    playTone(680,.12);
+    updateHUD();
+    message.textContent="KEY FOUND";
+    setTimeout(()=>{if(gameState==="playing")message.textContent="";},1000);
+    return;
+  }
+  if(distance(player,exitPoint)<1.5) {
+    if(found>=TOTAL_KEYS) winGame();
+    else {
+      message.textContent="THE EXIT IS LOCKED. FIND "+(TOTAL_KEYS-found)+" MORE KEY(S).";
+      setTimeout(()=>{if(gameState==="playing")message.textContent="";},1500);
+    }
+    return;
+  }
+  message.textContent="NOTHING WITHIN REACH";
+  setTimeout(()=>{if(gameState==="playing")message.textContent="";},700);
+}
+
+function winGame() {
+  gameState="won";
+  if(!bestTime || elapsed<bestTime) {
+    bestTime=elapsed;
+    localStorage.setItem("backroomsBestTime",String(bestTime));
+  }
+  playTone(760,.3);
+  showPanel("YOU ESCAPED","ENDING 01 · THE EXIT",
+    "You found the keys and made it out. But the fluorescent hum is still ringing in your ears.<br><br>"+
+    "Escape time: <strong>"+formatTime(elapsed)+"</strong><br>"+
+    "Best time: <strong>"+formatTime(bestTime)+"</strong><br><br>"+
+    "There are more secrets waiting in the dark.",
+    "PLAY AGAIN",newGame);
+}
+
+function loseGame() {
+  gameState="lost";
+  playTone(90,.5);
+  showPanel("IT FOUND YOU","ENDING 00 · LOST",
+    "The lights flicker. The footsteps stop. You turn around, but the hallway is empty.<br><br>"+
+    "Then something breathes right behind you.<br><br>"+
+    "You lasted "+formatTime(elapsed)+". The maze remains.",
+    "TRY AGAIN",newGame);
+}
+
+function formatTime(t) {
+  const m=Math.floor(t/60);
+  const s=Math.floor(t%60);
+  return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+
+function update(dt) {
+  elapsed+=dt;
+  flicker=Math.max(0,flicker-dt);
+  scare=Math.max(0,scare-dt);
+
+  let dx=0,dy=0;
+  if(move.up)dy--;
+  if(move.down)dy++;
+  if(move.left)dx--;
+  if(move.right)dx++;
+  const len=Math.hypot(dx,dy)||1;
+  dx/=len;dy/=len;
+
+  const sprint=move.run && stamina>0 && (dx||dy);
+  const speed=player.speed*(sprint?1.55:1);
+  if(sprint) stamina=Math.max(0,stamina-26*dt);
+  else stamina=Math.min(100,stamina+13*dt);
+
+  tryMove(player.x+dx*speed*dt,player.y+dy*speed*dt);
+
+  // The creature follows the player through the connected corridors.
+  if(monster.active) {
+    const d=distance(monster,player);
+    if(d<10) {
+      const mx=player.x-monster.x,my=player.y-monster.y;
+      const ml=Math.hypot(mx,my)||1;
+      const chaseSpeed=d<3?1.05:0.73;
+      const nx=monster.x+mx/ml*chaseSpeed*dt;
+      const ny=monster.y+my/ml*chaseSpeed*dt;
+      if(walkable(nx,monster.y)) monster.x=nx;
+      if(walkable(monster.x,ny)) monster.y=ny;
+      if(d<4) scare=Math.max(scare,0.5);
+      if(d<0.48) loseGame();
+    } else {
+      // Slowly wander until it detects you.
+      if(Math.random()<dt*.45) {
+        const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+        const dir=dirs[randInt(4)];
+        const nx=monster.x+dir[0]*.3,ny=monster.y+dir[1]*.3;
+        if(walkable(nx,ny)){monster.x=nx;monster.y=ny;}
+      }
+    }
+  }
+
+  // Proximity interaction prompt.
+  const nearThing=keys.some(k=>!k.found&&distance(player,k)<1.15)
+    || distance(player,exitPoint)<1.5;
+  if(nearThing) message.textContent="PRESS E / INTERACT";
+  else if(message.textContent==="PRESS E / INTERACT") message.textContent="";
+
+  if(Math.random()<dt*.07) flicker=.1+Math.random()*.15;
+}
+
+function draw() {
+  ctx.clearRect(0,0,viewW,viewH);
+  const horizon=viewH*.38;
+  const fov=Math.min(viewW,viewH)*.72;
+  const px=player.x*TILE,py=player.y*TILE;
+
+  // Retro corridor perspective background.
+  const grad=ctx.createLinearGradient(0,0,0,viewH);
+  grad.addColorStop(0,"#343019");
+  grad.addColorStop(.38,"#6d652b");
+  grad.addColorStop(.6,"#38331b");
+  grad.addColorStop(1,"#17150c");
+  ctx.fillStyle=grad;ctx.fillRect(0,0,viewW,viewH);
+
+  // Perspective wall panels and ceiling.
+  ctx.fillStyle="#252312";
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(viewW,0);
+  ctx.lineTo(viewW*.76,horizon);ctx.lineTo(viewW*.24,horizon);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#5e5726";
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(viewW*.24,horizon);
+  ctx.lineTo(viewW*.24,viewH*.77);ctx.lineTo(0,viewH);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#4a451f";
+  ctx.beginPath();ctx.moveTo(viewW,0);ctx.lineTo(viewW*.76,horizon);
+  ctx.lineTo(viewW*.76,viewH*.77);ctx.lineTo(viewW,viewH);ctx.closePath();ctx.fill();
+
+  // Repeating ceiling panels.
+  ctx.strokeStyle="#242211";ctx.lineWidth=1;
+  for(let i=0;i<9;i++) {
+    const t=i/9;
+    const y=horizon*t;
+    ctx.beginPath();ctx.moveTo(viewW*.1*t,y);ctx.lineTo(viewW*(1-.1*t),y);ctx.stroke();
+  }
+
+  // Distant light panels.
+  for(let i=0;i<6;i++) {
+    const t=(i+1)/7;
+    const y=horizon*(.28+t*.7);
+    const w=viewW*(.12*(1-t)+.012);
+    const h=2+14*(1-t);
+    ctx.fillStyle="#d6cb65";
+    ctx.globalAlpha=.25+.5*(1-t);
+    ctx.fillRect(viewW/2-w/2,y,w,h);
+  }
+  ctx.globalAlpha=1;
+
+  // Floor perspective grid.
+  ctx.strokeStyle="#6b6230";ctx.lineWidth=1;
+  for(let i=1;i<10;i++) {
+    const t=i/10;
+    const y=horizon+(viewH-horizon)*t*t;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(viewW,y);ctx.stroke();
+  }
+  for(let i=-7;i<=7;i++) {
+    ctx.beginPath();ctx.moveTo(viewW/2,horizon);
+    ctx.lineTo(viewW/2+i*viewW*.16,viewH);ctx.stroke();
+  }
+
+  // Simple radar-like mini-map in the corner.
+  const cell=Math.min(5,Math.max(3,viewW/100));
+  const mapW=COLS*cell,mapH=ROWS*cell;
+  const mx=viewW-mapW-12,my=100;
+  ctx.globalAlpha=.75;
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++) {
+    ctx.fillStyle=map[y][x]?"#c4b96b":"#282616";
+    ctx.fillRect(mx+x*cell,my+y*cell,cell-0.4,cell-0.4);
+  }
+  ctx.fillStyle="#fff";
+  ctx.fillRect(mx+player.x*cell-1,my+player.y*cell-1,3,3);
+  ctx.fillStyle="#f4df38";
+  keys.filter(k=>!k.found).forEach(k=>ctx.fillRect(mx+k.x*cell-1,my+k.y*cell-1,3,3));
+  ctx.fillStyle="#c21d18";
+  ctx.fillRect(mx+monster.x*cell-1,my+monster.y*cell-1,3,3);
+  ctx.globalAlpha=1;
+
+  // Flashlight reveals a warm central area.
+  const lightRadius=lightOn?fov*.65:fov*.18;
+  const light=ctx.createRadialGradient(viewW/2,viewH*.56,8,viewW/2,viewH*.56,lightRadius);
+  light.addColorStop(0,"rgba(255,246,173,.24)");
+  light.addColorStop(.35,"rgba(255,235,120,.10)");
+  light.addColorStop(1,"rgba(0,0,0,.88)");
+  ctx.fillStyle=light;ctx.fillRect(0,0,viewW,viewH);
+
+  // Draw objective hints in the direction of nearby items.
+  const scale=Math.min(viewW/COLS,viewH/ROWS)*.7;
+  function drawMarker(obj,color,label) {
+    const dx=obj.x-player.x,dy=obj.y-player.y;
+    const d=Math.hypot(dx,dy);
+    if(d>7)return;
+    const sx=viewW/2+(dx/d)*Math.min(viewW*.27,dx*scale*2);
+    const sy=viewH*.53+(dy/d)*Math.min(viewH*.2,dy*scale*2);
+    ctx.globalAlpha=Math.max(.25,1-d/8);
+    ctx.fillStyle=color;
+    ctx.beginPath();ctx.arc(sx,sy,Math.max(3,9-d),0,Math.PI*2);ctx.fill();
+    ctx.font="bold 10px Arial";ctx.textAlign="center";
+    ctx.fillText(label,sx,sy-13);
+    ctx.globalAlpha=1;
+  }
+  keys.filter(k=>!k.found).forEach(k=>drawMarker(k,"#f4df38","KEY"));
+  drawMarker(exitPoint,found>=TOTAL_KEYS?"#6affb1":"#b9a842","EXIT");
+
+  // Threat warning when the creature is close.
+  const md=distance(monster,player);
+  if(md<8) {
+    const intensity=Math.max(0,(8-md)/8);
+    ctx.fillStyle=`rgba(120,0,0,${intensity*.18})`;
+    ctx.fillRect(0,0,viewW,viewH);
+    ctx.fillStyle=`rgba(255,50,35,${intensity})`;
+    ctx.font="bold 12px Arial";
+    ctx.textAlign="center";
+    ctx.fillText("SOMETHING IS NEAR",viewW/2,viewH*.18);
+  }
+
+  // Low stamina indicator.
+  if(stamina<100) {
+    ctx.fillStyle="#080805aa";
+    ctx.fillRect(viewW/2-65,viewH-35,130,8);
+    ctx.fillStyle=stamina<25?"#c44":"#f4df38";
+    ctx.fillRect(viewW/2-63,viewH-33,126*stamina/100,4);
+  }
+
+  // Grain and flickering exposure.
+  ctx.globalAlpha=.035;
+  for(let i=0;i<110;i++) {
+    ctx.fillStyle=Math.random()>.5?"#fff":"#000";
+    ctx.fillRect(Math.random()*viewW,Math.random()*viewH,2,2);
+  }
+  ctx.globalAlpha=1;
+  if(flicker>0) {
+    ctx.fillStyle=`rgba(0,0,0,${Math.min(.85,flicker*3)})`;
+    ctx.fillRect(0,0,viewW,viewH);
+  }
+  if(scare>0) {
+    ctx.fillStyle=`rgba(100,0,0,${scare*.18})`;
+    ctx.fillRect(0,0,viewW,viewH);
+  }
+}
+
+function loop(now) {
+  if(!running || paused || gameState!=="playing") return;
+  const dt=Math.min((now-lastTime)/1000,.05);
+  lastTime=now;
+  update(dt);
+  draw();
+  if(running && gameState==="playing") requestAnimationFrame(loop);
+}
+
+$("startBtn").onclick=newGame;
+$("controlsBtn").onclick=showControls;
+$("pauseBtn").onclick=pauseGame;
+$("lightBtn").onclick=toggleLight;
+$("interactBtn").onclick=interact;
+$("runBtn").addEventListener("pointerdown",e=>{e.preventDefault();move.run=true;});
+["pointerup","pointercancel","pointerleave"].forEach(type=>
+  $("runBtn").addEventListener(type,()=>move.run=false));
+
+document.querySelectorAll("[data-move]").forEach(btn=>{
+  const dir=btn.dataset.move;
+  btn.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    btn.setPointerCapture?.(e.pointerId);
+    move[dir]=true;
+  });
+  ["pointerup","pointercancel","pointerleave"].forEach(type=>
+    btn.addEventListener(type,()=>move[dir]=false));
+});
+
+const keyMap={
+  ArrowUp:"up",w:"up",W:"up",
+  ArrowDown:"down",s:"down",S:"down",
+  ArrowLeft:"left",a:"left",A:"left",
+  ArrowRight:"right",d:"right",D:"right",
+  Shift:"run"
+};
+addEventListener("keydown",e=>{
+  if(keyMap[e.key]) {
+    move[keyMap[e.key]]=true;
+    if(e.key.startsWith("Arrow")) e.preventDefault();
+  }
+  if(e.key==="e"||e.key==="E") interact();
+  if(e.key==="f"||e.key==="F") toggleLight();
+  if(e.key==="Escape"||e.key==="p"||e.key==="P") pauseGame();
+});
+addEventListener("keyup",e=>{
+  if(keyMap[e.key]) move[keyMap[e.key]]=false;
+});
+addEventListener("blur",()=>{
+  move={up:false,down:false,left:false,right:false,run:false};
+});
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden && gameState==="playing" && !paused) pauseGame();
+});
+
+})();
+</script>
+</body>
+</html>

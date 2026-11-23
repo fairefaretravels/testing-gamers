@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#111018">
+
+<title>STREET KINGS | Free 2D Arcade Fighting Game</title>
+
+<meta name="description" content="Enter STREET KINGS, a gritty 2D arcade fighting game featuring animated character sprites, punches, kicks, blocks, special moves, and rival AI. Choose your fighter and battle for street supremacy on mobile, desktop or with a game controller.">
+<meta name="keywords" content="STREET KINGS game, Street Kings fighting game, 2D fighting game, free arcade fighting game, browser fighting game, animated sprite fighting, street battle game, rival AI, mobile fighting games, SENSTACK Games">
+<meta name="author" content="Saneca Mack">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="image" content="streetkings.PNG">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="STREET KINGS | Fight. Survive. Dominate.">
+<meta property="og:description" content="Choose your fighter and enter the arena. Master punches, kicks, blocks, special moves, and rival AI in STREET KINGS, a mobile-friendly 2D arcade fighting game.">
+<meta property="og:image" content="streetkings.PNG">
+<meta property="og:image:alt" content="STREET KINGS arcade fighting game cover featuring two fighters facing off on a neon-lit city street">
+<meta property="og:image:type" content="image/png">
+<meta property="og:site_name" content="SENSTACK Games">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="STREET KINGS — 2D Fight Demo">
+<meta name="twitter:description" content="Fight. Survive. Dominate. Experience animated combat, special moves, and rival AI in STREET KINGS.">
+<meta name="twitter:image" content="streetkings.PNG">
+<meta name="twitter:image:alt" content="Neon STREET KINGS fighting game poster">
+
+<link rel="icon" type="image/png" href="streetkings.PNG">
+
+<style>
+:root{--pink:#ff3e83;--gold:#ffc857;--ink:#111018;--panel:#201d2b;--cyan:#58e8ef}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ink);color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}
+button,input{font:inherit}
+#app{height:100dvh;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0,#34213e 0,#111018 65%)}
+header{display:flex;align-items:center;justify-content:space-between;padding:9px 12px 6px;gap:8px}
+h1{font-size:clamp(18px,5vw,27px);font-weight:1000;letter-spacing:2px;margin:0;line-height:1}
+h1 span{color:var(--pink)}
+#sub{font-size:9px;letter-spacing:2px;color:#bdb7cc;margin-top:4px}
+#hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:6px 12px 10px}
+.name{font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+.right{text-align:right}
+.bar{height:12px;background:#453e51;border:1px solid #6c6178;border-radius:3px;overflow:hidden}
+.fill{height:100%;width:100%;background:linear-gradient(90deg,#ff377e,#ff966c);transition:width .15s}
+.right .fill{margin-left:auto;background:linear-gradient(90deg,#ff966c,#ff377e)}
+#timer{font-size:24px;font-weight:1000;color:var(--gold);min-width:42px;text-align:center}
+#stage{position:relative;flex:1;min-height:180px;margin:0 8px;border:1px solid #44334d;border-radius:12px;overflow:hidden;background:#181525}
+canvas{display:block;width:100%;height:100%}
+#banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;text-align:center;font-weight:1000;font-size:clamp(25px,8vw,48px);letter-spacing:2px;text-shadow:0 4px 0 #000,0 0 24px #ff3e83;opacity:0;transition:opacity .15s}
+#banner.show{opacity:1}
+#banner small{display:block;font-size:12px;letter-spacing:3px;color:#fff;text-shadow:none}
+#controls{padding:10px 10px max(12px,env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 1.2fr;gap:10px;align-items:center}
+.movePad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.btn{min-height:49px;border:1px solid #51465e;border-radius:12px;background:linear-gradient(#30283a,#1e1a27);color:white;font-size:12px;font-weight:900;letter-spacing:.5px;box-shadow:0 3px 0 #09080d;touch-action:none;user-select:none;-webkit-user-select:none}
+.btn:active,.btn.down{transform:translateY(2px);box-shadow:0 1px 0 #09080d;background:#5a294b}
+.btn.attack{border-color:#ff3e83;background:linear-gradient(#a92558,#4a1737)}
+.btn.special{border-color:var(--gold);color:var(--gold)}
+.btn.blank{visibility:hidden}
+.under{display:flex;justify-content:space-between;padding:0 12px 7px;font-size:10px;color:#a59db4}
+.meter{height:5px;background:#40374a;border-radius:5px;margin-top:5px;overflow:hidden}
+.meter span{display:block;width:0;height:100%;background:var(--cyan)}
+.overlay{position:absolute;inset:0;background:#100d18ef;display:flex;align-items:center;justify-content:center;padding:18px;z-index:5}
+.dialog{width:min(440px,100%);max-height:92%;overflow:auto;border:1px solid #59445f;border-radius:18px;background:#201a2a;padding:22px;box-shadow:0 20px 80px #0009}
+.dialog h2{font-size:27px;margin:0 0 6px;letter-spacing:1px}
+.dialog h3{font-size:12px;letter-spacing:2px;margin:14px 0 6px;color:#bdb7cc}
+.dialog p{color:#c8bfd1;font-size:13px;line-height:1.5}
+.dialog .btn{width:100%;margin-top:8px}
+.hidden{display:none!important}
+#imageStatus,#charMsg{font-size:10px;color:#b8afc4;margin-top:6px}
+.pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pick.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pick .btn{margin:0;min-height:0;padding:6px 2px 8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;font-size:11px}
+.pick .btn canvas{width:64px;height:72px}
+.pick .btn.rnd{min-height:92px;justify-content:center;font-size:20px}
+.pick .btn.sel{border-color:var(--gold);background:linear-gradient(#5a294b,#2c1a35);box-shadow:0 0 0 2px var(--gold),0 3px 0 #09080d}
+#radioBtn{width:40px;min-height:36px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#8d849c}
+#radioBtn svg{width:20px;height:20px;fill:currentColor}
+#radioBtn .waves{opacity:0}
+#radioBtn.on{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px #58e8ef88,0 3px 0 #09080d}
+#radioBtn.on .waves{opacity:1}
+#radioBtn.loading{color:var(--gold);border-color:var(--gold);box-shadow:0 0 14px #ffc857cc,0 3px 0 #09080d;animation:glow 1s ease-in-out infinite}
+#radioBtn.err{color:#ff5b6e;border-color:#ff5b6e}
+@keyframes glow{0%,100%{box-shadow:0 0 4px #ffc85755,0 3px 0 #09080d}50%{box-shadow:0 0 20px #ffc857,0 3px 0 #09080d}}
+@media(min-width:760px){#app{max-width:900px;margin:auto;border-left:1px solid #302638;border-right:1px solid #302638}#controls{max-width:700px;width:100%;margin:0 auto}#stage{margin:0 16px}}
+@media(max-height:650px){header{padding-top:5px}#hud{padding-bottom:5px}#controls{padding-top:6px;gap:6px}.btn{min-height:40px}.dialog{padding:15px}.dialog h2{font-size:22px}.pick .btn canvas{width:48px;height:54px}.pick .btn.rnd{min-height:70px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div><h1>STREET <span>KINGS</span></h1><div id="sub">CITY FIGHTS • ROUND ONE</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn" id="radioBtn" type="button" aria-label="Radio" title="Radio"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path class="waves" d="M15.5 8.5a5 5 0 0 1 0 7l-1.4-1.4a3 3 0 0 0 0-4.2l1.4-1.4zm2.8-2.8a9 9 0 0 1 0 12.6l-1.4-1.4a7 7 0 0 0 0-9.8l1.4-1.4z"/></svg></button><button class="btn" id="menuBtn" style="min-height:36px;padding:0 12px">FIGHTERS</button></div></header>
+<section id="hud">
+<div><div class="name" id="pName">YOU · DIA</div><div class="bar"><div class="fill" id="pHealth"></div></div><div class="meter"><span id="pMeter"></span></div></div>
+<div id="timer">60</div>
+<div class="right"><div class="name" id="eName">RIVAL · REX</div><div class="bar"><div class="fill" id="eHealth"></div></div><div class="meter"><span id="eMeter"></span></div></div>
+</section>
+<main id="stage"><canvas id="game"></canvas><div id="banner"></div></main>
+<div class="under"><span id="status">READY TO FIGHT</span><span>WINS: <b id="wins">0</b></span></div>
+<section id="controls">
+<div class="movePad"><button class="btn blank" aria-hidden="true"></button><button class="btn" data-act="jump">JUMP</button><button class="btn blank" aria-hidden="true"></button><button class="btn" data-act="left">◀ LEFT</button><button class="btn" data-act="block">BLOCK</button><button class="btn" data-act="right">RIGHT ▶</button></div>
+<div class="actions"><button class="btn attack" data-act="punch">PUNCH</button><button class="btn attack" data-act="kick">KICK</button><button class="btn special" data-act="special">SPECIAL</button><button class="btn" data-act="dodge">DODGE</button><button class="btn" data-act="block">GUARD</button><button class="btn" data-act="rematch">REMATCH</button></div>
+</section>
+<div id="overlay" class="overlay"><div class="dialog"><h2>STREET <span style="color:var(--pink)">KINGS</span></h2><p>A mobile arcade fight. Beat the rival before the clock runs out. Pick your fighter, then step into the street.</p><button class="btn attack" id="startBtn">START FIGHT</button><button class="btn" id="customBtn">CHOOSE FIGHTERS</button><div id="imageStatus">Loading fighters…</div><p style="font-size:11px;color:#a59db4;margin-bottom:0">Controller: stick/D-pad move · D-pad up jump · X punch · A kick · Y or RT special · B/LB/LT block · RB dodge · Start fight · Select fighters</p></div></div>
+<div id="charOverlay" class="overlay hidden"><div class="dialog"><h2>CHOOSE FIGHTERS</h2><h3>YOU</h3><div class="pick" id="pickYou"></div><h3>RIVAL</h3><div class="pick four" id="pickRival"></div><p id="charMsg">Tap a fighter. The new match starts when you press the button below.</p><button class="btn attack" id="closeChar">FIGHT!</button></div></div>
+</div>
+<script>
+(()=>{'use strict';
+/* ---------- Fighter sprite sheets ----------
+   Each file is a transparent sheet, 6 columns x 9 rows of 300x200 cells.
+   Put Dia.PNG, Bonnie.PNG, Rex.PNG, Beeper.PNG, Skylar.PNG and Sen.PNG in the same folder as this page. */
+const CW=300,CH=200,AX=115,SPR_SCALE=.95;
+/* FIGHTER SIZE: fighters fill about FILL of the stage height. Raise for bigger fighters.
+   REACH widens attack range and AI spacing so bigger sprites still connect naturally. */
+const FILL=.86,REACH=1.4,START=.25;
+const ORDER=['idle','walk','jump','punch','kick','block','hit','special','win'];
+const CHARS={
+ DIA:{file:'Dia.PNG',color:'#c77dff',bright:1.45,frames:{idle:6,walk:6,jump:6,punch:5,kick:6,block:4,hit:5,special:5,win:2}},
+ BONNIE:{file:'Bonnie.PNG',color:'#a78bfa',frames:{idle:6,walk:6,jump:6,punch:6,kick:6,block:3,hit:3,special:6,win:4}},
+ REX:{file:'Rex.PNG',color:'#ff4d4d',frames:{idle:6,walk:6,jump:6,punch:3,kick:4,block:4,hit:4,special:5,win:2}},
+ BEEPER:{file:'Beeper.PNG',color:'#ff7ad9',frames:{idle:4,walk:6,jump:4,punch:3,kick:3,block:1,hit:4,special:4,win:3}},
+ SKYLAR:{file:'Skylar.PNG',color:'#9d7bff',frames:{idle:5,walk:6,jump:6,punch:5,kick:6,block:1,hit:5,special:5,win:2}},
+ SEN:{file:'Sen.PNG',color:'#ffd35a',frames:{idle:4,walk:6,jump:4,punch:3,kick:3,block:1,hit:4,special:4,win:3}}
+};
+const KEYS=Object.keys(CHARS);
+const FPS={idle:7,walk:12,block:6,win:4};
+let loadedCount=0;
+for(const k of KEYS){const c=CHARS[k];c.ok=false;c.image=new Image();c.image.onload=()=>{c.ok=c.image.naturalWidth>=CW*6;loadedCount++;statusText();buildPicker()};c.image.onerror=()=>{loadedCount++;statusText()};c.image.src=c.file}
+function statusText(){const ok=KEYS.filter(k=>CHARS[k].ok).length;$('imageStatus').textContent=loadedCount<KEYS.length?'Loading fighters…':ok===KEYS.length?'All '+KEYS.length+' fighters loaded.':'Missing sheets: '+KEYS.filter(k=>!CHARS[k].ok).map(k=>CHARS[k].file).join(', ')+' — placeholder fighters used.'}
+
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage');
+let W=800,H=400,dpr=1;
+function resize(){const r=stage.getBoundingClientRect();dpr=Math.min(window.devicePixelRatio||1,2);W=Math.max(300,r.width);H=Math.max(180,r.height);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+if('ResizeObserver'in window)new ResizeObserver(resize).observe(stage);window.addEventListener('resize',resize);resize();
+function $(id){return document.getElementById(id)}
+let running=false,ended=false,remaining=60,wins=0,last=0,shake=0;const keys={};
+const mk=(x,face,color,skin,pants)=>({x,y:0,hp:100,meter:0,face,act:'idle',actT:0,actDur:1,cool:0,block:false,dodge:0,jump:0,flash:0,char:null,won:false,ko:false,name:'',color,skin,pants});
+const p=mk(START,1,'#ff3e83','#a86b48','#242032'),e=mk(1-START,-1,'#58e8ef','#70462f','#171923');
+let sel={you:'DIA',rival:'RANDOM'};
+function assign(f,key){f.char=key;f.name=key}
+assign(p,'DIA');assign(e,'REX');
+let aiClock=0;const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+function announce(big,small='',stay=1000){const el=$('banner');el.replaceChildren();const main=document.createElement('span');main.textContent=big;el.appendChild(main);if(small){const sub=document.createElement('small');sub.textContent=small;main.appendChild(sub)}el.classList.add('show');clearTimeout(announce.t);if(stay)announce.t=setTimeout(()=>el.classList.remove('show'),stay)}
+function updateHud(){$('pHealth').style.width=p.hp+'%';$('eHealth').style.width=e.hp+'%';$('pMeter').style.width=p.meter+'%';$('eMeter').style.width=e.meter+'%';$('timer').textContent=Math.ceil(remaining);$('wins').textContent=wins;$('pName').textContent='YOU · '+p.name;$('eName').textContent='RIVAL · '+e.name}
+function applySelection(){
+ assign(p,sel.you);
+ let r=sel.rival;
+ if(r==='RANDOM'){const pool=KEYS.filter(k=>k!==sel.you);r=pool[Math.floor(Math.random()*pool.length)]}
+ assign(e,r);
+ p.color=CHARS[p.char].color;e.color=CHARS[e.char].color}
+function start(){applySelection();for(const f of [p,e]){f.hp=100;f.meter=0;f.act='idle';f.actT=0;f.cool=0;f.dodge=0;f.jump=0;f.block=false;f.won=false;f.ko=false;f.flash=0}p.x=START;e.x=1-START;remaining=60;ended=false;running=true;$('overlay').classList.add('hidden');$('charOverlay').classList.add('hidden');$('status').textContent='FIGHT!';announce('FIGHT!',p.name+' VS '+e.name,900);updateHud()}
+function endRound(winner){if(ended)return;ended=true;running=false;if(winner==='YOU'){wins++;p.won=true;e.ko=e.hp<=0;announce('YOU WIN!',p.name+' TAKES THE STREET',0)}else if(winner==='RIVAL'){e.won=true;p.ko=p.hp<=0;rumble(1,400);announce('KNOCKED OUT',e.name+' TAKES THIS ROUND',0)}else announce('TIME UP','ROUND DRAW',0);$('status').textContent='ROUND OVER';updateHud()}
+function strike(who,type){if(!running||ended||who.cool>0||who.act==='hit')return;if(type==='special'&&who.meter<100){if(who===p)$('status').textContent='SPECIAL NEEDS FULL METER';return}if(type==='special')who.meter=0;who.act=type;who.actT=type==='kick'?.52:type==='special'?.72:.38;who.actDur=who.actT;who.cool=type==='special'?.95:type==='kick'?.62:.42;who.block=false;$('status').textContent=who===p?type.toUpperCase()+'!':'RIVAL '+type.toUpperCase()}
+function hit(att,def,type){const dist=Math.abs(att.x-def.x),reach=(type==='kick'?.205:type==='special'?.24:.16)*REACH;if(dist>reach||Math.abs(att.jump-def.jump)>.23||def.dodge>0)return false;if(def.block){def.hp-=type==='special'?3:1;att.meter=clamp(att.meter+8,0,100);if(def===p)rumble(.25,60);return true}const damage=type==='special'?27:type==='kick'?14:9;def.hp=clamp(def.hp-damage,0,100);def.flash=.18;def.act='hit';def.actT=.22;def.actDur=.22;att.meter=clamp(att.meter+(type==='special'?5:type==='kick'?18:12),0,100);shake=type==='special'?9:4;if(def===p)rumble(type==='special'?1:.6,type==='special'?260:140);return true}
+function update(dt){if(!running||ended)return;remaining-=dt;if(remaining<=0){remaining=0;endRound(p.hp===e.hp?'DRAW':p.hp>e.hp?'YOU':'RIVAL');return}
+for(const f of [p,e]){f.cool=Math.max(0,f.cool-dt);f.flash=Math.max(0,f.flash-dt);f.dodge=Math.max(0,f.dodge-dt);f.jump=Math.max(0,f.jump-dt);if(f.actT>0){f.actT-=dt;if(f.actT<=0&&['punch','kick','special','hit','jump'].includes(f.act))f.act='idle'}}
+let move=0;if(keys.left||keys.ArrowLeft||keys.a||keys.A||GP.l)move-=1;if(keys.right||keys.ArrowRight||keys.d||keys.D||GP.r)move+=1;
+if(move&&p.dodge<=0){p.x+=move*dt*(p.act==='kick'?.17:.34);if(p.act==='idle'||p.act==='walk')p.act='walk'}else if(!move&&p.act==='walk')p.act='idle';
+if(keys.block||keys.s||keys.S||keys.ArrowDown||GP.blk){p.block=true;if(!['punch','kick','special','hit'].includes(p.act))p.act='block'}else{p.block=false;if(p.act==='block')p.act='idle'}
+p.x=clamp(p.x,.08,.92);e.x=clamp(e.x,.08,.92);p.face=e.x>=p.x?1:-1;e.face=-p.face;
+aiClock-=dt;const gap=Math.abs(e.x-p.x);
+if(e.cool<=0&&e.act!=='hit'&&e.dodge<=0){if(gap>.19*REACH){e.x+=(p.x>e.x?1:-1)*dt*.19*1.15;if(e.act==='idle'||e.act==='walk')e.act='walk'}else if(aiClock<=0){aiClock=.5+Math.random()*.75;const r=Math.random();if(r<.17){e.block=true;e.act='block'}else if(r<.28){e.dodge=.24;e.x=clamp(e.x+(p.x>e.x?-.055:.055),.08,.92);e.act='dodge'}else{e.block=false;strike(e,r>.84&&e.meter>=100?'special':r>.48?'kick':'punch')}}}
+if(e.act==='block'&&aiClock<.1&&e.cool<=0){e.block=false;e.act='idle'}
+for(const f of [p,e]){if(['punch','kick','special'].includes(f.act)&&f.actT>0){const window=f.act==='special'?.40:.20;if(f.actT<window&&f.actT>window-dt){hit(f,f===p?e:p,f.act)}}}
+if(p.act==='dodge'&&p.dodge<=0)p.act='idle';if(e.act==='dodge'&&e.dodge<=0)e.act='idle';
+if(p.hp<=0)endRound('RIVAL');else if(e.hp<=0)endRound('YOU');updateHud()}
+function rounded(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function selectedAnimation(f){if(f.won)return'win';if(f.ko||f.act==='hit')return'hit';if(f.block||f.act==='block')return'block';if(f.act==='special')return'special';if(f.act==='punch'||f.act==='kick')return f.act;if(f.jump>0||f.act==='jump')return'jump';if(f.act==='walk'||f.act==='dodge')return'walk';return'idle'}
+function frameFor(f,anim,frames,now){
+ if(anim==='hit'&&f.ko)return frames-1;
+ if(anim==='hit'||anim==='punch'||anim==='kick'||anim==='special'){const prog=clamp(1-f.actT/(f.actDur||1),0,.999);return Math.floor(prog*frames)}
+ if(anim==='jump'){const prog=clamp(1-f.jump/.65,0,.999);return Math.floor(prog*frames)}
+ return Math.floor(now/1000*(FPS[anim]||8))%frames}
+function drawSprite(c,anim,frame,s){const row=ORDER.indexOf(anim);ctx.drawImage(c.image,frame*CW,row*CH,CW,CH,-AX*s,-(CH-6)*s,CW*s,CH*s)}
+/* Fighter scale: fills FILL of the stage height, capped by stage width so they never swamp narrow phones */
+function fighterScale(){return Math.min(H*FILL/((CH-6)*SPR_SCALE),W/320)}
+function drawFighter(f,now){
+const x=f.x*W,ground=H*.92,scale=fighterScale(),sy=ground-f.jump*H*.3;ctx.save();ctx.translate(x,sy);ctx.scale(f.face,1);
+if(f.dodge>0){ctx.globalAlpha=.55;ctx.translate(-f.face*13*scale,4)}
+const bob=(f.act==='idle'&&!f.char)?Math.sin(now/220)*2:f.act==='walk'?Math.sin(now/65)*2:0;ctx.translate(0,bob);ctx.scale(scale,scale);
+ctx.globalAlpha*=.65;ctx.fillStyle='#05040a';ctx.beginPath();ctx.ellipse(0,2,31*1.3,7*1.3,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=f.flash>0?.65:1;
+const c=f.char&&CHARS[f.char];
+if(c&&c.ok){const anim=selectedAnimation(f);let frames=c.frames[anim]||1;
+ /* a normal hit uses the flinch frames only; the last hit frame is the knocked-out pose */
+ if(anim==='hit'&&!f.ko&&frames>2)frames--;
+ const fi=Math.min(frames-1,frameFor(f,anim,frames,now));if(c.bright&&'filter'in ctx)ctx.filter='brightness('+c.bright+')';drawSprite(c,anim,fi,SPR_SCALE);ctx.filter='none';ctx.restore();return}
+// Placeholder artwork (used only if a sprite sheet is missing)
+const punch=['punch','special'].includes(f.act),kick=f.act==='kick',block=f.block||f.act==='block',hurt=f.act==='hit',lean=punch?7:kick?4:hurt?-7:0;
+ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=f.pants;ctx.lineWidth=13;ctx.beginPath();ctx.moveTo(-7,-39);ctx.lineTo(kick?19:-13,-14);ctx.lineTo(kick?31:-17,-5);ctx.stroke();ctx.beginPath();ctx.moveTo(7,-39);ctx.lineTo(kick?-13:13,-14);ctx.lineTo(kick?-24:17,-5);ctx.stroke();
+ctx.fillStyle='#eee4dc';rounded(kick?23:-27,-9,17,8,3);rounded(kick?-30:10,-9,18,8,3);
+ctx.fillStyle=f.color;ctx.save();ctx.translate(lean,-66);ctx.rotate(punch?-.08:kick?-.04:hurt?-.1:0);rounded(-17,-19,34,42,8);ctx.fillStyle='#16131d';rounded(-17,7,34,8,2);ctx.fillStyle=f.skin;rounded(-6,-28,12,13,3);ctx.restore();
+ctx.lineWidth=10;ctx.strokeStyle=f.skin;ctx.beginPath();ctx.moveTo(-12,-77);ctx.lineTo(block?-24:-22,-61);ctx.lineTo(block?-19:-20,-52);ctx.stroke();ctx.beginPath();ctx.moveTo(12,-77);ctx.lineTo(punch?31:block?18:22,-70);ctx.lineTo(punch?49:block?22:19,-70);ctx.stroke();
+ctx.fillStyle='#f2d7c5';ctx.beginPath();ctx.arc(punch?49:block?22:19,-70,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(block?-19:-20,-52,6,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=f.skin;ctx.beginPath();ctx.arc(0,-96,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#15121a';ctx.beginPath();ctx.arc(-1,-101,14,Math.PI,Math.PI*2);ctx.fill();ctx.fillRect(-13,-101,25,5);ctx.fillStyle='#fff';ctx.fillRect(4,-96,4,2);ctx.fillStyle='#21151a';ctx.fillRect(4,-90,7,2);
+if(punch||kick||f.act==='special'){ctx.strokeStyle=f.act==='special'?'#ffc857':'#ff8cb8';ctx.lineWidth=4;ctx.globalAlpha=.8;ctx.beginPath();ctx.moveTo(24,-70);ctx.lineTo(punch?63:36,kick?-28:-71);ctx.stroke();ctx.globalAlpha=1;if(f.act==='special'){ctx.strokeStyle='#ffc857';ctx.lineWidth=2;ctx.beginPath();ctx.arc(30,-68,32,-.8,.8);ctx.stroke()}}
+ctx.restore()}
+function draw(){
+ctx.clearRect(0,0,W,H);const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1a1730');g.addColorStop(.62,'#3b2440');g.addColorStop(1,'#15111c');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#ffb5cc';ctx.globalAlpha=.7;ctx.beginPath();ctx.arc(W*.78,H*.18,Math.min(W,H)*.055,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+for(let i=0;i<15;i++){const bw=W/14+8,bx=i*W/13-W*.02,bh=H*(.16+((i*37)%9)/40);ctx.fillStyle=i%2?'#211c34':'#28203a';ctx.fillRect(bx,H*.55-bh,bw,bh);for(let yy=H*.55-bh+9;yy<H*.55-8;yy+=12)for(let xx=bx+6;xx<bx+bw-4;xx+=10){ctx.fillStyle=(Math.floor(xx+yy+i)%4===0)?'#ffbd66':'#6a4b72';ctx.globalAlpha=.55;ctx.fillRect(xx,yy,4,5);ctx.globalAlpha=1}}
+ctx.fillStyle='#191620';ctx.fillRect(0,H*.65,W,H*.35);ctx.strokeStyle='#7d496e';ctx.globalAlpha=.55;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H*.86);ctx.lineTo(W,H*.86);ctx.stroke();ctx.globalAlpha=1;ctx.strokeStyle='#63556b';ctx.setLineDash([22,18]);ctx.beginPath();ctx.moveTo(0,H*.975);ctx.lineTo(W,H*.975);ctx.stroke();ctx.setLineDash([]);
+ctx.save();if(shake>0){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake=Math.max(0,shake-.8)}const now=performance.now();drawFighter(p,now);drawFighter(e,now);ctx.restore();requestAnimationFrame(draw)}
+requestAnimationFrame(draw);
+function frame(t){if(!last)last=t;const dt=Math.min((t-last)/1000,.04);last=t;gpPoll();update(dt);requestAnimationFrame(frame)}requestAnimationFrame(frame);
+function act(a){
+if(a==='left'||a==='right'){keys[a]=true;return}
+if(a==='block'){keys.block=true;p.block=true;if(!['punch','kick','special','hit'].includes(p.act))p.act='block';return}
+if(a==='jump'){if(running&&p.jump<=0){p.jump=.65;p.act='jump';p.actT=.65;p.actDur=.65}return}
+if(a==='dodge'){if(running&&p.cool<=0){p.dodge=.25;p.cool=.35;p.act='dodge';p.x=clamp(p.x+(e.x>p.x?-.065:.065),.08,.92)}return}
+if(a==='rematch'){start();return}
+if(['punch','kick','special'].includes(a))strike(p,a)}
+function release(a){keys[a]=false;if(a==='block'){p.block=false;if(p.act==='block')p.act='idle'}}
+document.querySelectorAll('[data-act]').forEach(b=>{const a=b.dataset.act;b.addEventListener('pointerdown',ev=>{ev.preventDefault();try{b.setPointerCapture(ev.pointerId)}catch(_){}b.classList.add('down');act(a)});const up=ev=>{b.classList.remove('down');release(a)};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up)});
+window.addEventListener('keydown',ev=>{const k=ev.key;if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' '].includes(k))ev.preventDefault();keys[k]=true;if(k==='j'||k==='J')strike(p,'punch');if(k==='k'||k==='K')strike(p,'kick');if(k==='i'||k==='I'||k===' ')act('special');if(k==='l'||k==='L'){keys.block=true;p.block=true;if(!['punch','kick','special','hit'].includes(p.act))p.act='block'}if(k==='w'||k==='W'||k==='ArrowUp')act('jump');if(k==='Escape'){$('overlay').classList.remove('hidden');running=false}});
+window.addEventListener('keyup',ev=>{keys[ev.key]=false;if(['l','L','ArrowDown','s','S'].includes(ev.key)){p.block=false;if(p.act==='block')p.act='idle'}});
+
+/* ---------- Gamepad ----------
+   Move: left stick / D-pad   Jump: D-pad up or stick up   Punch: X   Kick: A
+   Special: Y or RT           Block (hold): B / LB / LT     Dodge: RB
+   Start: fight / rematch     Select: choose fighters */
+const GP={l:false,r:false,blk:false,prev:[],pad:null};
+function rumble(strong,ms){const g=GP.pad,a=g&&(g.vibrationActuator||(g.hapticActuators&&g.hapticActuators[0]));try{if(a&&a.playEffect)a.playEffect('dual-rumble',{duration:ms,strongMagnitude:strong,weakMagnitude:strong*.6})}catch(_){}}
+window.addEventListener('gamepadconnected',()=>{$('status').textContent='CONTROLLER READY';rumble(.4,150)});
+window.addEventListener('gamepaddisconnected',()=>{GP.pad=null;GP.l=GP.r=GP.blk=false});
+function gpPoll(){
+ GP.l=GP.r=GP.blk=false;
+ const list=navigator.getGamepads?navigator.getGamepads():[];let g=null;
+ for(const q of list){if(q&&q.connected){g=q;break}}
+ GP.pad=g;if(!g)return;
+ const b=i=>!!(g.buttons[i]&&g.buttons[i].pressed),press=i=>b(i)&&!GP.prev[i];
+ const ax=g.axes[0]||0,ay=g.axes[1]||0;
+ GP.l=ax<-.3||b(14);GP.r=ax>.3||b(15);GP.blk=b(1)||b(4)||b(6);
+ const overlayOpen=!$('overlay').classList.contains('hidden'),pickerOpen=!$('charOverlay').classList.contains('hidden');
+ if(overlayOpen||pickerOpen){if(press(0)||press(9))start();else if(press(8)&&overlayOpen)openPicker()}
+ else{
+  if(press(9)&&ended)start();
+  else if(press(8)){running=false;openPicker()}
+  if(press(2))act('punch');
+  if(press(0))act('kick');
+  if(press(3)||press(7))act('special');
+  if(press(5))act('dodge');
+  if(press(12)||(ay<-.6&&!(GP.prev.up)))act('jump');
+ }
+ GP.prev=g.buttons.map(x=>x.pressed);GP.prev.up=ay<-.6;
+}
+
+/* ---------- Fighter picker ---------- */
+function thumb(key){const cv=document.createElement('canvas');cv.width=128;cv.height=144;const c=CHARS[key],x=cv.getContext('2d');if(c.ok){const s=.8;if(c.bright&&'filter'in x)x.filter='brightness('+c.bright+')';x.drawImage(c.image,0,0,CW,CH,64-AX*s,138-(CH-6)*s,CW*s,CH*s)}else{x.fillStyle=c.color;x.fillRect(44,30,40,100)}return cv}
+function buildPicker(){
+ for(const [id,who,extra] of [['pickYou','you',false],['pickRival','rival',true]]){
+  const box=$(id);box.replaceChildren();
+  const list=extra?[...KEYS,'RANDOM']:KEYS;
+  for(const k of list){
+   const b=document.createElement('button');b.className='btn'+(sel[who]===k?' sel':'')+(k==='RANDOM'?' rnd':'');b.type='button';
+   if(k==='RANDOM'){b.textContent='?'}else{b.appendChild(thumb(k));const t=document.createElement('span');t.textContent=k;b.appendChild(t)}
+   b.addEventListener('click',()=>{sel[who]=k;buildPicker()});box.appendChild(b)}}
+}
+buildPicker();
+function openPicker(){buildPicker();$('charOverlay').classList.remove('hidden')}
+$('startBtn').onclick=start;$('customBtn').onclick=openPicker;$('menuBtn').onclick=()=>{running=false;openPicker()};$('closeChar').onclick=start;
+updateHud();
+
+/* ---------- Radio ---------- */
+const RADIO_URL='https://listen.streamaudio.co/proxy/mackinthedark/stream';
+const radioBtn=$('radioBtn');let radio=null;
+const setRadio=st=>{radioBtn.className='btn'+(st?' '+st:'');radioBtn.title=st==='on'?'Radio on':st==='loading'?'Connecting…':st==='err'?'Radio offline — tap to retry':'Radio off'};
+function radioOff(){if(radio){radio.pause();radio.removeAttribute('src');radio.load();radio=null}setRadio('')}
+radioBtn.addEventListener('click',()=>{
+ if(radio&&!radio.paused){radioOff();return}
+ radioOff();setRadio('loading');
+ const a=radio=new Audio();a.preload='none';a.src=RADIO_URL;
+ a.addEventListener('playing',()=>{if(radio===a)setRadio('on')});
+ a.addEventListener('waiting',()=>{if(radio===a)setRadio('loading')});
+ a.addEventListener('error',()=>{if(radio===a){radio=null;setRadio('err')}});
+ a.play().catch(()=>{if(radio===a){radio=null;setRadio('err')}});
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SENSTACK Arcade | Play Now</title>
+<meta name="description" content="Play games in the SENSTACK Arcade, featuring original arcade experiences from Saneca Mack.">
+
+<link rel="canonical" href="https://garden-of-terror.vercel.app/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SENSTACK Arcade">
+<meta property="og:title" content="SENSTACK Arcade | Play Now">
+<meta property="og:description" content="Explore original games and arcade experiences from SENSTACK.">
+<meta property="og:url" content="https://garden-of-terror.vercel.app/">
+<meta property="og:image" content="https://garden-of-terror.vercel.app/mitd3d.jpg">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SENSTACK Arcade | Play Now">
+<meta name="twitter:description" content="Explore original games and arcade experiences from SENSTACK.">
+<meta name="twitter:image" content="https://garden-of-terror.vercel.app/mitd3d.jpg">
+
+<style>
+:root {
+  --green: #56e39f;
+  --cyan: #42e8f5;
+  --purple: #a878ff;
+  --gold: #ffd166;
+  --pink: #ff4fa3;
+  --silver: #c5d0d5;
+  --bg: #07090f;
+  --panel: #10151d;
+  --muted: #c0cbd1;
+  --border: #354652;
+  --px: "Press Start 2P", "Courier New", monospace;
+  --vt: "VT323", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  padding: 0 16px 28px;
+  overflow-x: hidden;
+  color: #f3f7f8;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  background:
+    radial-gradient(ellipse at 50% -10%, #1b1440 0, transparent 60%),
+    var(--bg);
+}
+
+/* CRT EFFECT */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,.12) 0 1px,
+    transparent 1px 4px
+  );
+  box-shadow: inset 0 0 90px rgba(0,0,0,.35);
+}
+
+/* NEON FLOOR */
+.floor {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  bottom: 0;
+  height: 45vh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(66,232,245,.3) 1px, transparent 1px) 0 0 / 60px 60px,
+    linear-gradient(0deg, rgba(168,120,255,.3) 1px, transparent 1px) 0 0 / 60px 60px;
+  transform: perspective(350px) rotateX(62deg);
+  transform-origin: bottom;
+  mask-image: linear-gradient(to top, #000, transparent 85%);
+  -webkit-mask-image: linear-gradient(to top, #000, transparent 85%);
+  animation: floorMove 1.6s linear infinite;
+}
+
+@keyframes floorMove {
+  to { background-position: 0 60px, 0 60px; }
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+/* TICKER */
+.ticker {
+  position: relative;
+  z-index: 1;
+  margin: 0 -16px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--pink);
+  background: #12071a;
+  padding: 12px 0;
+  color: var(--gold);
+  font: 700 14px/1.5 Arial, sans-serif;
+}
+
+.ticker div {
+  display: inline-block;
+  padding-left: 100%;
+  animation: tickerMove 32s linear infinite;
+}
+
+.ticker b {
+  margin: 0 18px;
+  color: var(--cyan);
+}
+
+@keyframes tickerMove {
+  to { transform: translateX(-100%); }
+}
+
+/* HERO */
+.hero {
+  padding: 38px 0 32px;
+  text-align: center;
+}
+
+.sign {
+  margin: 0 0 28px;
+  font: 900 clamp(32px, 7vw, 64px)/1.2 Arial, Helvetica, sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sign .a,
+.sign .b {
+  display: block;
+  color: #fff;
+}
+
+.sign .a {
+  text-shadow:
+    0 0 6px var(--green),
+    0 0 18px var(--green),
+    0 0 42px var(--green),
+    4px 4px 0 #0a3b27;
+  animation: neonGlow 3.4s infinite;
+}
+
+.sign .b {
+  margin-top: 12px;
+  text-shadow:
+    0 0 6px var(--purple),
+    0 0 18px var(--purple),
+    0 0 42px var(--purple),
+    4px 4px 0 #2b1a55;
+}
+
+@keyframes neonGlow {
+  0%, 18%, 22%, 62%, 64%, 100% { opacity: 1; }
+  20%, 63% { opacity: .65; }
+}
+
+/* ARCADE CABINET */
+.cabinet {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 14px;
+  border: 3px solid #3b4656;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #2a2f3a, #0e1118);
+  box-shadow:
+    0 0 0 3px #000,
+    0 0 28px rgba(66,232,245,.45),
+    0 0 75px rgba(168,120,255,.35);
+  animation: cabinetGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes cabinetGlow {
+  to {
+    box-shadow:
+      0 0 0 3px #000,
+      0 0 35px rgba(86,227,159,.55),
+      0 0 95px rgba(255,79,163,.35);
+  }
+}
+
+.screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 2px solid #000;
+  border-radius: 10px;
+  background: #05070b;
+  box-shadow: inset 0 0 40px rgba(0,0,0,.8);
+}
+
+.screen img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.2) contrast(1.06);
+  animation: screenPush 18s ease-in-out infinite alternate;
+}
+
+@keyframes screenPush {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.1) translate(-1%, -1%); }
+}
+
+.screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    transparent 45%,
+    rgba(5,7,11,.9)
+  );
+}
+
+.screen::after {
+  content: "";
+  position: absolute;
+  top: -25%;
+  left: 0;
+  right: 0;
+  height: 22%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255,255,255,.12),
+    transparent
+  );
+  animation: screenSweep 5s linear infinite;
+}
+
+@keyframes screenSweep {
+  to { top: 110%; }
+}
+
+/* FEATURED GAME TEXT */
+.hud {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 18px 20px;
+}
+
+.hud p {
+  margin: 0 0 14px;
+  color: #fff;
+  font-size: clamp(17px, 2.5vw, 25px);
+  font-weight: 700;
+  line-height: 1.5;
+  text-shadow: 2px 2px 4px #000;
+}
+
+.hud p strong {
+  color: var(--gold);
+}
+
+.coin {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 52px;
+  padding: 12px 20px;
+  border: 2px solid var(--gold);
+  background: var(--gold);
+  color: #1a1200;
+  font: 800 16px/1.4 Arial, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 4px 4px 0 #000;
+  transition: background .2s, color .2s, transform .2s;
+}
+
+.coin:hover,
+.coin:focus-visible {
+  background: #fff;
+  border-color: #fff;
+  color: #111;
+  transform: translateY(-2px);
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.corner {
+  position: absolute;
+  z-index: 4;
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--cyan);
+  filter: drop-shadow(0 0 6px var(--cyan));
+}
+
+.c1 { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+.c2 { top: 8px; right: 8px; border-left: 0; border-bottom: 0; }
+.c3 { bottom: 8px; left: 8px; border-right: 0; border-top: 0; }
+.c4 { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+
+.sub {
+  margin: 22px 0 0;
+  color: var(--silver);
+  font: 700 14px/1.8 Arial, sans-serif;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.sub strong {
+  color: var(--gold);
+}
+
+/* GAME SECTION BAR */
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 16px;
+  padding: 13px 15px;
+  border: 2px solid var(--border);
+  background: rgba(8,12,18,.9);
+  font: 700 15px/1.5 Arial, sans-serif;
+}
+
+.bar h2 {
+  margin: 0;
+  color: #fff;
+  font: inherit;
+}
+
+.bar span {
+  color: var(--green);
+}
+
+/* CATEGORY FILTERS */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 24px;
+}
+
+.filter-btn {
+  appearance: none;
+  min-height: 44px;
+  padding: 11px 15px;
+  border: 2px solid var(--border);
+  background: #0b1118;
+  color: #f3f7f8;
+  font: 700 14px/1.4 Arial, sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+
+.filter-btn:hover,
+.filter-btn:focus-visible {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.filter-btn.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: #04140c;
+  box-shadow: 0 0 15px rgba(86,227,159,.25);
+}
+
+/* GAME GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.card {
+  --accent: var(--green);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  background: var(--panel);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+
+.card:nth-child(4n+2) { --accent: var(--cyan); }
+.card:nth-child(4n+3) { --accent: var(--purple); }
+.card:nth-child(4n+4) { --accent: var(--gold); }
+
+.img {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #0b1117;
+}
+
+.img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s;
+}
+
+.img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(5,8,11,.65)
+  );
+}
+
+.tag {
+  position: absolute;
+  z-index: 1;
+  top: 9px;
+  left: 9px;
+  max-width: calc(100% - 18px);
+  padding: 7px 9px;
+  border: 2px solid var(--accent);
+  background: #000;
+  color: var(--accent);
+  font: 700 12px/1.4 Arial, sans-serif;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.body h3 {
+  margin: 0;
+  color: var(--accent);
+  font: 800 16px/1.5 Arial, sans-serif;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.body p {
+  flex: 1;
+  margin: 10px 0 16px;
+  color: var(--muted);
+  font: 400 17px/1.55 Arial, sans-serif;
+}
+
+.go {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 2px dashed rgba(197,208,213,.25);
+  color: var(--accent);
+  font: 800 14px/1.4 Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.go i {
+  flex-shrink: 0;
+  font-style: normal;
+  font-size: 22px;
+  transition: transform .2s;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 6px 8px 0 #000, 0 0 22px var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card:hover .img img,
+.card:focus-visible .img img {
+  transform: scale(1.06);
+}
+
+.card:hover .go i,
+.card:focus-visible .go i {
+  transform: translateX(4px);
+}
+
+/* EMPTY FILTER STATE */
+.empty-state {
+  display: none;
+  grid-column: 1 / -1;
+  padding: 30px 20px;
+  border: 2px dashed var(--border);
+  color: var(--muted);
+  text-align: center;
+  font: 16px/1.7 Arial, sans-serif;
+}
+
+.empty-state.show {
+  display: block;
+}
+
+/* FOOTER */
+.lives {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 34px 0 0;
+}
+
+.lives span {
+  width: 22px;
+  height: 8px;
+  background: var(--c);
+  box-shadow: 0 0 8px var(--c);
+  animation: lifePulse 1.6s steps(2) infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes lifePulse {
+  50% { opacity: .4; }
+}
+
+footer {
+  margin-top: 22px;
+  padding: 0 5px;
+  color: #b3c0c6;
+  font: 13px/1.9 Arial, sans-serif;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+footer span {
+  color: var(--gold);
+}
+
+/* INTRO SPLASH */
+#arcade-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: #05060b;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+
+#arcade-splash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3,5,12,.35),
+      rgba(3,5,12,.3) 35%,
+      rgba(3,5,12,.94)
+    ),
+    url("mitd3d.jpg") center center / cover no-repeat;
+  animation: splashZoom 12s ease-in-out infinite alternate;
+}
+
+#arcade-splash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 4px,
+    rgba(0,0,0,.12) 4px 5px
+  );
+}
+
+@keyframes splashZoom {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.1); }
+}
+
+.splash-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  text-align: center;
+}
+
+.splash-kicker {
+  margin: 0 0 20px;
+  color: var(--cyan);
+  font: 800 clamp(14px, 3.5vw, 19px)/1.6 Arial, sans-serif;
+  letter-spacing: 2px;
+  text-shadow: 0 0 14px var(--cyan);
+}
+
+.splash-title {
+  margin: 0;
+  font: 900 clamp(36px, 9vw, 76px)/1.2 Arial, sans-serif;
+  letter-spacing: 1px;
+  overflow-wrap: anywhere;
+}
+
+.splash-title span {
+  display: block;
+}
+
+.splash-title .splash-senstack {
+  color: #fff;
+  text-shadow:
+    0 0 8px var(--green),
+    0 0 24px var(--green),
+    0 0 55px rgba(86,227,159,.8);
+}
+
+.splash-title .splash-arcade {
+  color: #fff;
+  text-shadow:
+    0 0 8px var(--purple),
+    0 0 24px var(--purple),
+    0 0 55px rgba(168,120,255,.8);
+}
+
+.splash-description {
+  max-width: 540px;
+  margin: 24px auto 32px;
+  color: #fff;
+  font: 500 clamp(18px, 4.5vw, 25px)/1.65 Arial, sans-serif;
+  text-shadow: 2px 2px 5px #000;
+}
+
+#splash-start {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  min-width: 250px;
+  min-height: 60px;
+  padding: 17px 24px;
+  border: 2px solid var(--gold);
+  border-radius: 0;
+  background: var(--gold);
+  color: #100d05;
+  font: 800 clamp(16px, 4vw, 20px)/1.4 Arial, sans-serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 0 25px rgba(255,209,102,.35), 5px 5px 0 #000;
+  transition: background .2s, color .2s, transform .2s;
+}
+
+#splash-start:hover,
+#splash-start:focus-visible {
+  background: #fff;
+  border-color: #fff;
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+  transform: translateY(-2px);
+}
+
+.splash-footer {
+  margin: 26px 0 0;
+  color: #fff;
+  font: 600 13px/1.8 Arial, sans-serif;
+  letter-spacing: 1.5px;
+  text-shadow: 1px 1px 4px #000;
+}
+
+#arcade-splash.splash-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body.splash-active {
+  overflow: hidden;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+  }
+
+  .body h3 {
+    font-size: 15px;
+  }
+}
+
+/* PHONE */
+@media (max-width: 600px) {
+  body {
+    padding: 0 11px 22px;
+  }
+
+  .ticker {
+    margin: 0 -11px;
+    font-size: 13px;
+  }
+
+  .hero {
+    padding: 30px 0 26px;
+  }
+
+  .sign {
+    font-size: clamp(29px, 8vw, 44px);
+    letter-spacing: 0;
+  }
+
+  .cabinet {
+    padding: 8px;
+    border-radius: 14px;
+  }
+
+  .hud {
+    padding: 8px 10px 12px;
+  }
+
+  .hud p {
+    margin-bottom: 8px;
+    font-size: clamp(14px, 3.8vw, 19px);
+    line-height: 1.35;
+  }
+
+  .coin {
+    min-height: 44px;
+    padding: 10px 13px;
+    font-size: 14px;
+  }
+
+  .sub {
+    font-size: 12px;
+    line-height: 1.8;
+    letter-spacing: 1px;
+  }
+
+  .bar {
+    font-size: 14px;
+  }
+
+  .filters {
+    gap: 8px;
+  }
+
+  .filter-btn {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .body {
+    padding: 11px;
+  }
+
+  .body h3 {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .body p {
+    margin: 8px 0 12px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .go {
+    font-size: 12px;
+  }
+
+  .go i {
+    font-size: 19px;
+  }
+
+  .tag {
+    top: 6px;
+    left: 6px;
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+
+  #arcade-splash {
+    padding: 20px 16px;
+  }
+
+  .splash-kicker {
+    margin-bottom: 16px;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .splash-title {
+    font-size: clamp(34px, 10vw, 48px);
+    line-height: 1.2;
+  }
+
+  .splash-description {
+    margin: 19px auto 25px;
+    padding: 0 4px;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  #splash-start {
+    width: 100%;
+    max-width: 320px;
+    min-height: 58px;
+    padding: 14px 12px;
+    font-size: 18px;
+  }
+
+  .splash-footer {
+    margin-top: 20px;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  footer {
+    font-size: 12px;
+  }
+}
+
+/* VERY SMALL PHONES */
+@media (max-width: 360px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .body h3 {
+    font-size: 16px;
+  }
+
+  .body p {
+    font-size: 16px;
+  }
+
+  .tag {
+    font-size: 11px;
+  }
+
+  .splash-title {
+    font-size: 34px;
+  }
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  .card {
+    opacity: 1;
+  }
+}
+
+/* SENSTACK ARCADE RADIO */
+.arcade-radio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  max-width: 900px;
+  margin: 22px auto 28px;
+  padding: 15px 18px;
+  border: 2px solid var(--border);
+  background: linear-gradient(110deg, #10151d, #171027);
+  box-shadow: 4px 4px 0 #000, 0 0 18px rgba(66, 232, 245, .12);
+}
+
+.radio-info {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.radio-indicator {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  border-radius: 50%;
+  background: #68737a;
+  box-shadow: 0 0 0 4px rgba(197, 208, 213, .08);
+}
+
+.radio-indicator.is-playing {
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+  animation: radioPulse 1.5s ease-in-out infinite;
+}
+
+.radio-info strong {
+  display: block;
+  color: var(--cyan);
+  font: 800 15px/1.5 Arial, sans-serif;
+  letter-spacing: 1px;
+}
+
+.radio-info p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font: 14px/1.5 Arial, sans-serif;
+}
+
+.radio-toggle {
+  flex-shrink: 0;
+  min-height: 46px;
+  padding: 11px 15px;
+  border: 2px solid var(--green);
+  background: var(--green);
+  color: #04140c;
+  font: 800 13px/1.3 Arial, sans-serif;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+
+.radio-toggle:hover,
+.radio-toggle:focus-visible {
+  border-color: var(--cyan);
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.radio-toggle.is-playing {
+  border-color: var(--pink);
+  background: transparent;
+  color: #fff;
+}
+
+@keyframes radioPulse {
+  50% { opacity: .5; }
+}
+
+@media (max-width: 480px) {
+  .arcade-radio {
+    gap: 10px;
+    padding: 13px 11px;
+  }
+
+  .radio-info {
+    gap: 9px;
+  }
+
+  .radio-info strong {
+    font-size: 13px;
+    letter-spacing: .4px;
+  }
+
+  .radio-info p {
+    font-size: 13px;
+  }
+
+  .radio-toggle {
+    min-height: 44px;
+    padding: 10px;
+    font-size: 12px;
+  }
+}
+
+.pad-test {
+  display: block;
+  margin-top: 10px;
+  border-color: #56e39f;
+  color: #56e39f;
+  text-align: center;
+}
+
+/* CONTROLLER POP-UP */
+#pad-pop{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,5,12,.82);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+#pad-pop.open{opacity:1;visibility:visible}
+.pad-box{position:relative;width:100%;max-width:520px;padding:26px 22px 22px;text-align:center;border:3px solid var(--cyan);background:linear-gradient(150deg,#141a26,#0b0e16);box-shadow:0 0 0 3px #000,0 0 30px rgba(66,232,245,.5),0 0 80px rgba(168,120,255,.35);transform:translateY(14px) scale(.96);transition:transform .3s}
+#pad-pop.open .pad-box{transform:none}
+.pad-kicker{margin:0 0 8px;color:var(--pink);font:800 13px/1.4 Arial,sans-serif;letter-spacing:3px;text-shadow:0 0 10px var(--pink)}
+.pad-box h2{margin:0 0 14px;color:#fff;font:900 clamp(26px,7vw,38px)/1.15 Arial,sans-serif;text-transform:uppercase;text-shadow:0 0 8px var(--green),0 0 24px var(--green)}
+.pad-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 16px}
+.pad-chip{padding:12px 6px;border:2px solid var(--accent,var(--green));background:#05070b;color:var(--accent,var(--green));font:800 12px/1.4 Arial,sans-serif;letter-spacing:.5px;text-transform:uppercase;box-shadow:3px 3px 0 #000}
+.pad-chip b{display:block;margin-bottom:4px;font-size:28px;line-height:1}
+.pad-chip:nth-child(1){--accent:var(--green)}.pad-chip:nth-child(2){--accent:var(--cyan)}.pad-chip:nth-child(3){--accent:var(--gold)}
+.pad-box p{margin:0 0 18px;color:var(--muted);font:16px/1.55 Arial,sans-serif}
+#pad-status{display:block;margin-top:6px;color:var(--green);font-weight:800}
+.pad-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.pad-go,.pad-later{min-height:48px;padding:12px 18px;font:800 15px/1.3 Arial,sans-serif;text-decoration:none;cursor:pointer;border:2px solid var(--gold)}
+.pad-go{background:var(--gold);color:#1a1200;box-shadow:4px 4px 0 #000}
+.pad-later{background:transparent;color:#fff;border-color:var(--border)}
+.pad-go:hover,.pad-go:focus-visible,.pad-later:hover,.pad-later:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.pad-x{position:absolute;top:8px;right:8px;width:40px;height:40px;border:0;background:none;color:#fff;font-size:22px;cursor:pointer}
+</style>
+</head>
+
+<body>
+
+<!-- SENSTACK ARCADE SPLASH SCREEN -->
+<section id="arcade-splash" aria-label="SENSTACK ARCADE introduction">
+  <div class="splash-content">
+    <p class="splash-kicker">SANECA MACK PRESENTS</p>
+
+    <h1 class="splash-title">
+      <span class="splash-senstack">SENSTACK</span>
+      <span class="splash-arcade">ARCADE</span>
+    </h1>
+
+    <p class="splash-description">
+      Fighters. Racers. Monsters. Legends. Casino.<br>
+      Your next game starts here.
+    </p>
+
+    <button id="splash-start" type="button">
+      PRESS START &gt;
+    </button>
+
+    <p class="splash-footer">
+      INSERT COIN · SELECT YOUR GAME
+    </p>
+  </div>
+</section>
+<!-- END SPLASH SCREEN -->
+
+<!-- CONTROLLER POP-UP -->
+<div id="pad-pop" role="dialog" aria-modal="true" aria-labelledby="pad-title" aria-hidden="true">
+  <div class="pad-box">
+    <button class="pad-x" type="button" id="pad-close" aria-label="Close">✕</button>
+    <p class="pad-kicker">★ NEW · CONTROLLER SUPPORT ★</p>
+    <h2 id="pad-title">Now play with a controller!</h2>
+    <div class="pad-row" aria-hidden="true">
+      <div class="pad-chip"><b>🎮</b>Xbox</div>
+      <div class="pad-chip"><b>🕹️</b>PlayStation</div>
+      <div class="pad-chip"><b>🏎️</b>Steering<br>controller</div>
+    </div>
+    <p>Plug in or pair your Xbox, PlayStation or Bluetooth controller, then press any button. Drive the streets of <strong style="color:#ffd166">Pothole City</strong> with real triggers and a real wheel.
+      <span id="pad-status" aria-live="polite"></span></p>
+    <div class="pad-actions">
+      <a class="pad-go"
+         href="https://garden-of-terror.vercel.app/potholecity">
+        PLAY POTHOLE CITY ▸
+      </a>
+      <a class="pad-go pad-test"
+         href="https://garden-of-terror.vercel.app/Opportunity"
+         target="_blank"
+         rel="noopener noreferrer">
+        TEST THE CREATIVE NETWORK ▸
+      </a>
+      <button class="pad-later" type="button" id="pad-later">
+        BROWSE GAMES
+      </button>
+    </div>
+  </div> <!-- closes .pad-box -->
+</div> <!-- closes #pad-pop -->
+<!-- END CONTROLLER POP-UP -->
+
+<!-- SENSTACK ARCADE RADIO -->
+<section class="arcade-radio" aria-label="SENSTACK Arcade Radio">
+  <div class="radio-info">
+    <span class="radio-indicator" id="radio-indicator"></span>
+    <div>
+      <strong>SENSTACK RADIO</strong>
+      <p id="radio-status" aria-live="polite">Radio is off</p>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    id="radio-toggle"
+    class="radio-toggle"
+    aria-pressed="false"
+  >
+    TURN RADIO ON
+  </button>
+
+  <audio id="arcade-radio-audio" preload="none">
+    <source
+      src="https://listen.streamaudio.co/proxy/mackinthedark/stream"
+      type="audio/mpeg"
+    >
+  </audio>
+</section>
+
+<div class="floor" aria-hidden="true"></div>
+
+<div class="ticker" aria-hidden="true">
+  <div>
+    HIGH SCORE <b>999,999</b>
+    1UP <b>READY</b>
+    18 GAMES AVAILABLE <b>BASKETBALL</b>
+    CONNECT 4 <b>TIC TAC TOE</b>
+    INSERT COIN <b>PLAY YOUR WAY</b>
+    SENSTACK ARCADE <b>BY SANECA MACK</b>
+  </div>
+</div>
+
+<main>
+<header class="hero">
+  <h1 class="sign">
+    <span class="a">SENSTACK</span>
+    <span class="b">ARCADE</span>
+  </h1>
+
+  <div class="cabinet">
+    <div class="screen">
+      <img
+        src="mitd3d.jpeg"
+        onerror="this.onerror=null;this.src='mitd3d.jpg'"
+        alt="SENSTACK ARCADE: futuristic gaming worlds and neon action"
+      >
+
+      <i class="corner c1"></i>
+      <i class="corner c2"></i>
+      <i class="corner c3"></i>
+      <i class="corner c4"></i>
+
+      <div class="hud">
+        <p>Fighters. Racers. Monsters. Slots <strong>Pick your game.</strong></p>
+        <a class="coin" href="#games">INSERT COIN ▸ PRESS START</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="sub">
+    Enter the arcade.<br>
+    <strong>Choose your game.</strong> Play your way.
+  </p>
+</header>
+
+<section id="games" aria-labelledby="games-heading">
+
+  <div class="bar">
+    <h2 id="games-heading">SELECT YOUR GAME</h2>
+    <span id="game-count" aria-live="polite">19 GAMES</span>
+  </div>
+
+  <nav class="filters" aria-label="Filter games by category">
+    <button class="filter-btn active" type="button" data-filter="all" aria-pressed="true">ALL GAMES</button>
+    <button class="filter-btn" type="button" data-filter="arcade" aria-pressed="false">ARCADE</button>
+    <button class="filter-btn" type="button" data-filter="adventure" aria-pressed="false">ADVENTURE</button>
+    <button class="filter-btn" type="button" data-filter="business" aria-pressed="false">BUSINESS</button>
+    <button class="filter-btn" type="button" data-filter="driving" aria-pressed="false">DRIVING</button>
+    <button class="filter-btn" type="button" data-filter="fighting" aria-pressed="false">FIGHTING</button>
+    <button class="filter-btn" type="button" data-filter="horror" aria-pressed="false">HORROR</button>
+    <button class="filter-btn" type="button" data-filter="promo" aria-pressed="false">PROMO</button>
+    <button class="filter-btn" type="button" data-filter="sports" aria-pressed="false">SPORTS</button>
+    <button class="filter-btn" type="button" data-filter="strategy" aria-pressed="false">STRATEGY</button>
+    <button class="filter-btn" type="button" data-filter="survival" aria-pressed="false">SURVIVAL</button>
+  </nav>
+
+  <nav class="grid" aria-label="Game selection">
+
+    <!-- 01 COMMERCE -->
+    <a class="card" data-category="business"
+       href="https://garden-of-terror.vercel.app/ssdr/"
+       aria-label="Play Commerce Game">
+      <div class="img">
+        <img src="commerce.jpg" alt="Commerce Game artwork" loading="lazy">
+        <span class="tag">BUSINESS SIM</span>
+      </div>
+      <div class="body">
+        <h3>Commerce</h3>
+        <p>Explore an interactive business and commerce experience.</p>
+        <div class="go"><span>Play game</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 02 PROMO -->
+    <a class="card" data-category="promo driving"
+       href="https://fairefaretravels.github.io/SenStack/ssrgame/static-game/"
+       aria-label="Play Driving Promo">
+      <div class="img">
+        <img src="static.jpg" alt="Driving Promo game artwork" loading="lazy">
+        <span class="tag">THE STATIC</span>
+      </div>
+      <div class="body">
+        <h3>Promo</h3>
+        <p>Explore the promotional version of the driving game experience.</p>
+        <div class="go"><span>Launch game</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 03 POTHOLE CITY -->
+    <a class="card" data-category="driving"
+       href="https://garden-of-terror.vercel.app/potholecity"
+       aria-label="Play Pothole City">
+      <div class="img">
+        <img src="potholecity.jpg" alt="Pothole City driving game artwork" loading="lazy">
+        <span class="tag">URBAN DRIVING</span>
+      </div>
+      <div class="body">
+        <h3>Pothole City</h3>
+        <p>Take on an urban driving experience filled with road challenges.</p>
+        <div class="go"><span>Enter the city</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 04 CODEQUESTER -->
+    <a class="card" data-category="driving adventure"
+       href="https://codequester.vercel.app/"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Play CodeQuestER (opens in a new tab)">
+      <div class="img">
+        <img src="cq.jpg" alt="CodeQuestER open-world driving game artwork" loading="lazy">
+        <span class="tag">OPEN WORLD</span>
+      </div>
+      <div class="body">
+        <h3>CodeQuestER</h3>
+        <p>Explore the city, drive an open world, discover locations, and enjoy the in-game radio.</p>
+        <div class="go"><span>Explore the world</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 05 ENERGY VAMPIRES -->
+    <a class="card" data-category="survival"
+       href="https://codequester.vercel.app/energyvampires"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Play Energy Vampires (opens in a new tab)">
+      <div class="img">
+        <img src="energyvampires.jpg" alt="Energy Vampires survival game artwork" loading="lazy">
+        <span class="tag">SURVIVAL</span>
+      </div>
+      <div class="body">
+        <h3>Energy Vampires</h3>
+        <p>Face energy-draining enemies, avoid danger, and fight to survive.</p>
+        <div class="go"><span>Enter the game</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 06 KEY TO THE CITY -->
+    <a class="card" data-category="adventure"
+       href="https://key-to-the-city.vercel.app/"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Explore Key to the City (opens in a new tab)">
+      <div class="img">
+        <img src="keytothecity.jpg" alt="Key to the City digital world artwork" loading="lazy">
+        <span class="tag">CITY</span>
+      </div>
+      <div class="body">
+        <h3>Key to the City</h3>
+        <p>Explore an original city-based digital experience built around discovery.</p>
+        <div class="go"><span>Explore the city</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 07 HUSTLE CITY -->
+    <a class="card" data-category="adventure"
+       href="https://hustlecity.vercel.app/"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Play Hustle City (opens in a new tab)">
+      <div class="img">
+        <img src="ssd1.jpg" alt="Hustle City arcade adventure artwork" loading="lazy">
+        <span class="tag">ADVENTURE</span>
+      </div>
+      <div class="body">
+        <h3>Hustle City</h3>
+        <p>Step into a colorful city adventure where ambition meets action.</p>
+        <div class="go"><span>Enter Hustle City</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 08 GARDEN OF TERROR -->
+    <a class="card" data-category="horror fighting"
+       href="https://garden-of-terror.vercel.app/sk1"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Play Garden of Terror (opens in a new tab)">
+      <div class="img">
+        <img src="got.jpg" alt="Garden of Terror horror fighting game artwork" loading="lazy">
+        <span class="tag">HORROR FIGHTER</span>
+      </div>
+      <div class="body">
+        <h3>Garden of Terror</h3>
+        <p>Enter a dark arena, confront dangerous fighters, and survive the garden.</p>
+        <div class="go"><span>Enter the garden</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 09 STREET KINGS -->
+    <a class="card" data-category="fighting"
+       href="https://garden-of-terror.vercel.app/sk2/"
+       aria-label="Play Street Kings">
+      <div class="img">
+        <img src="streetkings.PNG" alt="Street Kings fighting game artwork" loading="lazy">
+        <span class="tag">FIGHTING</span>
+      </div>
+      <div class="body">
+        <h3>Street Kings</h3>
+        <p>Take the battle to the streets in the next chapter of the fighting arena.</p>
+        <div class="go"><span>Fight now</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 10 SENSTACK NEON RUN -->
+    <a class="card" data-category="arcade"
+       href="https://garden-of-terror.vercel.app/neon-run/"
+       aria-label="Play SENSTACK Neon Run">
+      <div class="img">
+        <img src="neon-run.jpg" alt="SENSTACK Neon Run 2D platformer artwork in neon green, cyan, purple, and gold" loading="lazy">
+        <span class="tag">PLATFORMER</span>
+      </div>
+      <div class="body">
+        <h3>SENSTACK Neon Run</h3>
+        <p>Run, jump, collect energy, dodge hazards, and race to the portal.</p>
+        <div class="go"><span>Start running</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 11 SPACE FORCE -->
+    <a class="card" data-category="arcade"
+       href="https://garden-of-terror.vercel.app/space-force/"
+       aria-label="Play Space Force">
+      <div class="img">
+        <img src="space-force.PNG" alt="Space Force space shooter artwork with spacecraft and futuristic combat" loading="lazy">
+        <span class="tag">SPACE SHOOTER</span>
+      </div>
+      <div class="body">
+        <h3>Space Force</h3>
+        <p>Take command, dodge incoming fire, and defend your sector in a space battle.</p>
+        <div class="go"><span>Launch mission</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 12 TIC TAC TOE -->
+    <a class="card" data-category="strategy"
+       href="https://garden-of-terror.vercel.app/ttt/"
+       aria-label="Play Tic Tac Toe">
+      <div class="img">
+        <img src="ttt.PNG" alt="Tic Tac Toe strategy game on a futuristic SENSTACK board" loading="lazy">
+        <span class="tag">STRATEGY</span>
+      </div>
+      <div class="body">
+        <h3>Tic Tac Toe</h3>
+        <p>Think ahead, make your moves, and outsmart your opponent.</p>
+        <div class="go"><span>Play now</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 13 CONNECT 4 -->
+    <a class="card" data-category="strategy"
+       href="https://garden-of-terror.vercel.app/connect4/"
+       aria-label="Play Connect 4">
+      <div class="img">
+        <img src="connect4.PNG" alt="Connect 4 board game with colorful pieces" loading="lazy">
+        <span class="tag">2 PLAYERS</span>
+      </div>
+      <div class="body">
+        <h3>Connect 4</h3>
+        <p>Drop your pieces, connect four in a row, and block your opponent.</p>
+        <div class="go"><span>Play Connect 4</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 14 LUCKY CHERRY SLOTS -->
+    <a class="card" data-category="arcade"
+       href="https://garden-of-terror.vercel.app/slots/"
+       aria-label="Play Lucky Cherry Slots">
+      <div class="img">
+        <img src="luckycherry.jpg" alt="Lucky Brass Slots casino slot machine artwork with glowing reels" loading="lazy">
+        <span class="tag">CASINO</span>
+      </div>
+      <div class="body">
+        <h3>Lucky Cherry Slots</h3>
+        <p>Spin the reels, match three symbols, and stack your coins starting from 5,000.</p>
+        <div class="go"><span>Spin to win</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 15 NEON BINGO -->
+    <a class="card" data-category="arcade"
+       href="https://garden-of-terror.vercel.app/bingo/"
+       aria-label="Play Neon Bingo">
+      <div class="img">
+        <img src="bingo.jpg" alt="Neon Bingo card with glowing numbers and bingo balls" loading="lazy">
+        <span class="tag">TIMED BINGO</span>
+      </div>
+      <div class="body">
+        <h3>Neon Bingo</h3>
+        <p>Beat the clock, tap the called numbers, and complete lines before time runs out.</p>
+        <div class="go"><span>Play bingo</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 16 BASKETBALL -->
+    <a class="card" data-category="sports"
+       href="https://garden-of-terror.vercel.app/basketball/"
+       aria-label="Play Basketball">
+      <div class="img">
+        <img src="basketball.jpg" alt="SENSTACK Basketball arcade sports game artwork" loading="lazy">
+        <span class="tag">SPORTS</span>
+      </div>
+      <div class="body">
+        <h3>Basketball</h3>
+        <p>Hit the court, line up your shots, and take on the basketball challenge.</p>
+        <div class="go"><span>Play basketball</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 17 THE SCORPION TREASURE -->
+    <a class="card" data-category="arcade"
+       href="https://garden-of-terror.vercel.app/st/"
+       aria-label="Play The Scorpion Treasure">
+      <div class="img">
+        <img src="scorpseo.jpg"
+             alt="The Scorpion Treasure dark fantasy casino slot game featuring a humanoid Scorpion monster with glowing gold treasure and casino lighting"
+             loading="lazy">
+        <span class="tag">CASINO</span>
+      </div>
+      <div class="body">
+        <h3>The Scorpion Treasure</h3>
+        <p>Enter the golden vault, spin the reels, and awaken the Scorpion's venom bonus in this dark fantasy slot adventure.</p>
+        <div class="go"><span>Claim the treasure</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+
+    <!-- 18 BAR RUSH -->
+    <a class="card" data-category="arcade"
+       href="https://garden-of-terror.vercel.app/barrush/"
+       aria-label="Play Bar Rush">
+      <div class="img">
+        <img src="barrush.jpg"
+             alt="Bar Rush fast-paced arcade bartending game featuring cocktails, a busy bar, and nightlife atmosphere"
+             loading="lazy">
+        <span class="tag">SIMULATION</span>
+      </div>
+      <div class="body">
+        <h3>Bar Rush</h3>
+        <p>Step behind the bar, serve thirsty customers, mix drinks, and race against the clock to keep the party going.</p>
+        <div class="go"><span>Start the rush</span><i aria-hidden="true">▶</i></div>
+      </div>
+    </a>
+    
+<!-- 19 GO HOME -->
+<a class="card" data-category="arcade"
+   href="https://garden-of-terror.vercel.app/go%home"
+   aria-label="Play Go Home">
+  <div class="img">
+    <img src="gethome.PNG"
+         alt="Go Home two-player adventure board game featuring a winding wooden bridge, scenic landscapes, and an exciting journey home"
+         loading="lazy">
+    <span class="tag">ADVENTURE</span>
+  </div>
+  <div class="body">
+    <h3>Go Home</h3>
+    <p>Roll the dice, cross winding wooden bridges, explore four adventurous worlds, overcome obstacles, and race your way home. Two players. One destination. Who makes it home first?</p>
+    <div class="go"><span>Start the adventure</span><i aria-hidden="true">▶</i></div>
+  </div>
+</a>
+    <div class="empty-state" id="empty-state">
+      NO GAMES FOUND IN THIS CATEGORY.
+    </div>
+
+  </nav>
+</section>
+
+<div class="lives" aria-hidden="true">
+  <span style="--c:var(--green);--d:0s"></span>
+  <span style="--c:var(--cyan);--d:.2s"></span>
+  <span style="--c:var(--purple);--d:.4s"></span>
+  <span style="--c:var(--pink);--d:.6s"></span>
+  <span style="--c:var(--gold);--d:.8s"></span>
+</div>
+
+<footer>
+  SENSTACK <span>·</span> ARCADE<br>
+  Games for the restless mind.<br>
+  © Saneca Mack
+</footer>
+
+</main>
+
+<script>
+(() => {
+
+  // Splash screen: reveal the arcade when the player presses Start.
+  const splash = document.getElementById('arcade-splash');
+  const startButton = document.getElementById('splash-start');
+
+  document.body.classList.add('splash-active');
+
+  function enterArcade() {
+    splash.classList.add('splash-hidden');
+    document.body.classList.remove('splash-active');
+
+    window.setTimeout(() => {
+      splash.hidden = true;
+    }, 700);
+  }
+
+  startButton.addEventListener('click', enterArcade);
+
+  const cards = [...document.querySelectorAll('.card')];
+  const filters = [...document.querySelectorAll('.filter-btn')];
+  const countDisplay = document.getElementById('game-count');
+  const emptyState = document.getElementById('empty-state');
+
+  const totalGames = cards.length;
+
+  // Assign staggered animation delays to the cards.
+  cards.forEach((card, index) => {
+    card.style.setProperty('--i', index);
+  });
+
+  // Set the initial total game count.
+  countDisplay.textContent = `${totalGames} GAMES`;
+
+  function filterGames(category) {
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const categories = (card.dataset.category || '')
+        .split(/\s+/)
+        .filter(Boolean);
+
+      const matches = category === 'all' || categories.includes(category);
+
+      card.hidden = !matches;
+
+      if (matches) {
+        visibleCount++;
+      }
+    });
+
+    countDisplay.textContent =
+      `${visibleCount} ${visibleCount === 1 ? 'GAME' : 'GAMES'}`;
+
+    emptyState.classList.toggle('show', visibleCount === 0);
+  }
+
+  filters.forEach(button => {
+    button.addEventListener('click', () => {
+      const selectedCategory = button.dataset.filter;
+
+      filters.forEach(filterButton => {
+        const isActive = filterButton === button;
+
+        filterButton.classList.toggle('active', isActive);
+        filterButton.setAttribute('aria-pressed', String(isActive));
+      });
+
+      filterGames(selectedCategory);
+    });
+  });
+
+  // Ensure the initial display includes all games.
+  filterGames('all');
+})();
+</script>
+
+<script>
+(() => {
+  const audio = document.getElementById("arcade-radio-audio");
+  const button = document.getElementById("radio-toggle");
+  const status = document.getElementById("radio-status");
+  const indicator = document.getElementById("radio-indicator");
+
+  if (!audio || !button || !status || !indicator) return;
+
+  function setRadioState(playing) {
+    button.classList.toggle("is-playing", playing);
+    indicator.classList.toggle("is-playing", playing);
+    button.setAttribute("aria-pressed", String(playing));
+    button.textContent = playing ? "TURN RADIO OFF" : "TURN RADIO ON";
+    status.textContent = playing ? "Streaming live" : "Radio is off";
+  }
+
+  button.addEventListener("click", async () => {
+    if (!audio.paused) {
+      audio.pause();
+      setRadioState(false);
+      return;
+    }
+
+    status.textContent = "Connecting to station…";
+    button.disabled = true;
+
+    try {
+      await audio.play();
+      setRadioState(true);
+    } catch (error) {
+      status.textContent = "Couldn't connect. Try again.";
+      setRadioState(false);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  audio.addEventListener("playing", () => setRadioState(true));
+
+  audio.addEventListener("pause", () => setRadioState(false));
+
+  audio.addEventListener("error", () => {
+    setRadioState(false);
+    status.textContent = "Station unavailable. Try again later.";
+  });
+})();
+</script>
+
+<script>
+(() => {
+  const pop = document.getElementById('pad-pop');
+  if (!pop) return;
+  const status = document.getElementById('pad-status');
+  const start = document.getElementById('splash-start');
+  let seen = false;
+  try { seen = sessionStorage.getItem('padPopSeen') === '1'; } catch (e) {}
+
+  const open = () => {
+    if (seen) return;
+    pop.classList.add('open'); pop.setAttribute('aria-hidden', 'false');
+    document.getElementById('pad-later').focus();
+  };
+  const close = () => {
+    pop.classList.remove('open'); pop.setAttribute('aria-hidden', 'true');
+    seen = true;
+    try { sessionStorage.setItem('padPopSeen', '1'); } catch (e) {}
+  };
+
+  // Show right after the player presses START on the splash screen
+  if (start) start.addEventListener('click', () => setTimeout(open, 700));
+  else window.addEventListener('load', () => setTimeout(open, 800));
+
+  document.getElementById('pad-close').addEventListener('click', close);
+  document.getElementById('pad-later').addEventListener('click', close);
+  pop.addEventListener('click', e => { if (e.target === pop) close(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && pop.classList.contains('open')) close(); });
+
+  // Light up when a controller is detected
+  addEventListener('gamepadconnected', e => {
+    status.textContent = '✔ Controller detected: ' + e.gamepad.id.split('(')[0].trim();
+  });
+})();
+</script>
+
+</body>
+</html>

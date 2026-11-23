@@ -1,0 +1,121 @@
+{
+ "views": {
+  "front": {
+   "w": 407,
+   "h": 694,
+   "body": "creature_front.webp",
+   "anchor": [
+    203,
+    683
+   ],
+   "bodyH": 474,
+   "tail": "tail_front.webp",
+   "pivot": [
+    200,
+    405
+   ],
+   "glow": "glow_front.webp",
+   "tailFront": false,
+   "eyes": [
+    [
+     -12,
+     -437
+    ],
+    [
+     12,
+     -437
+    ]
+   ]
+  },
+  "q34": {
+   "w": 396,
+   "h": 691,
+   "body": "creature_q34.webp",
+   "anchor": [
+    231,
+    680
+   ],
+   "bodyH": 475,
+   "tail": "tail_q34.webp",
+   "pivot": [
+    215,
+    378
+   ],
+   "glow": "glow_q34.webp",
+   "tailFront": false,
+   "eyes": [
+    [
+     24,
+     -438
+    ],
+    [
+     38,
+     -435
+    ]
+   ]
+  },
+  "side": {
+   "w": 386,
+   "h": 692,
+   "body": "creature_side.webp",
+   "anchor": [
+    119,
+    681
+   ],
+   "bodyH": 471,
+   "tail": "tail_side.webp",
+   "pivot": [
+    213,
+    410
+   ],
+   "glow": "glow_side.webp",
+   "tailFront": false,
+   "eyes": [
+    [
+     -64,
+     -432
+    ]
+   ]
+  },
+  "back": {
+   "w": 336,
+   "h": 693,
+   "body": "creature_back.webp",
+   "anchor": [
+    168,
+    682
+   ],
+   "bodyH": 452,
+   "tail": "tail_back.webp",
+   "pivot": [
+    188,
+    416
+   ],
+   "glow": "glow_back.webp",
+   "tailFront": true,
+   "eyes": []
+  }
+ },
+ "spriteDir": "sprites/",
+ "closeup": "closeup.jpg",
+ "speed": {
+  "patrol": 0.85,
+  "investigate": 1.45,
+  "hunt": 2.15,
+  "lunge": 3.5
+ },
+ "hear": {
+  "still": 1.0,
+  "walk": 3.4,
+  "run": 7.5
+ },
+ "sight": {
+  "light": 9,
+  "dark": 4.5
+ },
+ "windup": 0.5,
+ "lunge": 0.55,
+ "lungeCooldown": 7,
+ "lungeRange": 2.4,
+ "memory": 3.2
+}

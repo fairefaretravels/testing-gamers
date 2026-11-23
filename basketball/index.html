@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hoops Trivia</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+<style>
+:root{
+  --bg:#07090f; --panel:#10151d; --ink:#f3f7f8; --muted:#9fb0b8; --line:#2b3a44;
+  --orange:#ff8a2b; --cyan:#42e8f5; --green:#56e39f; --pink:#ff4fa3; --gold:#ffd166;
+  --px:"Press Start 2P","Courier New",monospace; --vt:"VT323","Courier New",monospace;
+  color-scheme:dark;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#07090f;}}
+:root[data-theme="dark"]{--bg:#07090f;}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% -10%,#3a1a08,var(--bg) 60%);background-color:var(--bg);color:var(--ink);font-family:var(--vt);font-size:21px;display:flex;justify-content:center;padding:16px 12px 28px}
+main{width:100%;max-width:480px}
+h1{font:clamp(16px,5vw,22px)/1.3 var(--px);text-align:center;margin:4px 0 14px;color:#fff;text-shadow:0 0 6px var(--orange),0 0 18px var(--orange),0 0 36px var(--orange)}
+.hud{display:flex;justify-content:space-between;gap:8px;font:9px/1.6 var(--px);color:var(--muted);margin-bottom:8px}
+.hud b{display:block;font-size:13px;color:var(--gold);font-weight:400}
+.hud .s b{color:var(--cyan)}
+.hud .f b{color:var(--orange)}
+.timer{height:9px;background:#1a2230;border:1px solid var(--line);margin-bottom:10px}
+.timer i{display:block;height:100%;width:100%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);transition:width .1s linear}
+.timer.low i{background:var(--pink);box-shadow:0 0 12px var(--pink)}
+.court{border:3px solid var(--line);background:linear-gradient(#0d1420,#1b1008);box-shadow:5px 5px 0 #000;margin-bottom:12px}
+.court svg{display:block;width:100%;height:auto}
+.net{transform-origin:200px 100px}
+.net.swish{animation:swish .5s}
+@keyframes swish{30%{transform:scaleY(1.25) scaleX(.9)}60%{transform:scaleY(.95)}}
+.rimhit{animation:clank .35s}
+@keyframes clank{25%{transform:translateX(3px)}60%{transform:translateX(-2px)}}
+.banner{position:absolute;left:0;right:0;top:12px;text-align:center;font:12px var(--px);pointer-events:none;opacity:0}
+.courtwrap{position:relative}
+.banner.show{animation:ban 1s}
+@keyframes ban{0%{opacity:0;transform:scale(.6)}20%{opacity:1;transform:scale(1.1)}80%{opacity:1}100%{opacity:0}}
+.q{font-size:clamp(22px,5.5vw,26px);line-height:1.1;margin:0 0 12px;min-height:2.3em}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:center;text-align:left;width:100%;padding:11px 12px;border:3px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:22px;cursor:pointer;box-shadow:3px 3px 0 #000}
+.opt kbd{font:9px var(--px);color:var(--orange);border:2px solid var(--orange);padding:5px 6px}
+.opt:hover:not(:disabled),.opt:focus-visible{border-color:var(--orange);outline:none;box-shadow:3px 3px 0 #000,0 0 14px var(--orange)}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--green);background:#0e2a1f;box-shadow:0 0 16px var(--green)}
+.opt.bad{border-color:var(--pink);background:#2a0e1d;box-shadow:0 0 16px var(--pink)}
+.end{text-align:center;padding:18px 8px}
+.end h2{font:16px/1.5 var(--px);color:var(--gold);margin:0 0 12px}
+.end p{margin:8px 0}
+.big{font:30px var(--px);color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
+.btn{margin-top:14px;padding:14px 20px;border:3px solid var(--orange);background:var(--orange);color:#1a0d00;font:11px var(--px);cursor:pointer;box-shadow:4px 4px 0 #000}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.hide{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* HOOPS TRIVIA — ARCADE WIN EFFECTS */
+@keyframes courtShake {
+  0%,100% { transform:translateX(0); }
+  20% { transform:translateX(-5px) rotate(-1deg); }
+  40% { transform:translateX(5px) rotate(1deg); }
+  60% { transform:translateX(-3px); }
+  80% { transform:translateX(3px); }
+}
+@keyframes scorePop {
+  0% { transform:scale(1); }
+  40% { transform:scale(1.3); color:#fff; }
+  100% { transform:scale(1); }
+}
+@keyframes victoryGlow {
+  0%,100% { box-shadow:0 0 0 transparent; }
+  50% { box-shadow:0 0 32px #ffd166, inset 0 0 18px #ff8a2b; }
+}
+@keyframes confettiFall {
+  0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(340px) rotate(720deg); opacity:0; }
+}
+@keyframes victoryZoom {
+  0% { transform:scale(.3) rotate(-8deg); opacity:0; }
+  65% { transform:scale(1.15) rotate(3deg); opacity:1; }
+  100% { transform:scale(1) rotate(0); opacity:1; }
+}
+.court.shake { animation:courtShake .35s; }
+.court.glow { animation:victoryGlow .7s; }
+#score.pop { animation:scorePop .4s; }
+.victory-word {
+  font:clamp(17px,5vw,25px)/1.5 var(--px);
+  text-align:center;
+  color:var(--gold);
+  text-shadow:0 0 8px var(--orange),0 0 25px var(--orange);
+  animation:victoryZoom .45s both;
+  margin:10px 0;
+}
+.confetti-piece {
+  position:absolute;
+  top:-15px;
+  width:8px;
+  height:13px;
+  pointer-events:none;
+  z-index:10;
+  animation:confettiFall 1.5s ease-in forwards;
+}
+.courtwrap { overflow:hidden; }
+#end .big {
+  animation:victoryZoom .6s both;
+}
+#end .champion {
+  font:clamp(12px,3.5vw,16px)/1.8 var(--px);
+  color:var(--gold);
+  text-shadow:0 0 15px var(--orange);
+}
+#end .record {
+  padding:12px;
+  border:2px solid var(--gold);
+  margin:12px 0;
+  background:#211707;
+}
+@media (prefers-reduced-motion:reduce) {
+  .confetti-piece { display:none; }
+  .court.shake,.court.glow,#score.pop,
+  #end .big,.victory-word { animation:none; }
+}
+
+</style>
+</head>
+<body>
+<main>
+  <h1>HOOPS TRIVIA</h1>
+  <div class="hud">
+    <div>Question<b id="qn">1/10</b></div>
+    <div class="s">Score<b id="score">0</b></div>
+    <div class="f">Streak<b id="streak">0</b></div>
+    <div>Best<b id="best">0</b></div>
+  </div>
+  <div class="timer" id="bar"><i id="fill"></i></div>
+  <div class="courtwrap">
+    <div class="court">
+      <svg viewBox="0 0 400 250" aria-label="Basketball hoop">
+        <rect x="0" y="215" width="400" height="35" fill="#2a1608"/>
+        <path d="M0 215H400" stroke="#ff8a2b" stroke-width="2" opacity=".6"/>
+        <rect x="150" y="14" width="100" height="70" fill="#dfe8ee" fill-opacity=".14" stroke="#c5d0d5" stroke-width="3"/>
+        <rect x="178" y="48" width="44" height="30" fill="none" stroke="#ff8a2b" stroke-width="2"/>
+        <g id="rim"><ellipse cx="200" cy="100" rx="30" ry="7" fill="none" stroke="#ff8a2b" stroke-width="4"/></g>
+        <circle id="ball" cx="110" cy="225" r="17" fill="#ff8a2b" stroke="#7a3300" stroke-width="2"/>
+        <g id="ballL" stroke="#7a3300" stroke-width="2" fill="none"></g>
+        <g class="net" id="net" stroke="#f3f7f8" stroke-width="1.5" opacity=".85">
+          <path d="M172 102L184 140M186 105L192 142M200 107V143M214 105L208 142M228 102L216 140M178 120H222M184 134H216" fill="none"/>
+        </g>
+        <path d="M170 100Q200 118 230 100" fill="none" stroke="#ff8a2b" stroke-width="4"/>
+      </svg>
+    </div>
+    <div class="banner" id="banner"></div>
+  </div>
+  <section id="play">
+    <p class="q" id="q" aria-live="polite"></p>
+    <div class="opts" id="opts"></div>
+  </section>
+  <section id="end" class="end hide"></section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  // 50 QUESTIONS — ADD MORE ANYTIME
+  // Format: question, four answers, correct answer index
+  var BANK = [
+    ["How many players from one team are on the court?",["5","6","7","4"],0],
+    ["Who scored 100 points in one NBA game?",["Wilt Chamberlain","Bill Russell","Elgin Baylor","Oscar Robertson"],0],
+    ["Which city is home to the Celtics?",["Boston","Chicago","Detroit","Miami"],0],
+    ["How many points is a shot behind the arc worth?",["3","2","4","1"],0],
+    ["What number is Michael Jordan most famous for wearing?",["23","32","45","6"],0],
+    ["Who passed Kareem Abdul-Jabbar's career scoring record?",["LeBron James","Kobe Bryant","Karl Malone","Kevin Durant"],0],
+    ["How high is a regulation basketball rim?",["10 feet","9 feet","11 feet","8 feet"],0],
+    ["Who invented basketball?",["James Naismith","John Wooden","Red Auerbach","Phog Allen"],0],
+    ["What is the NBA shot clock?",["24 seconds","30 seconds","20 seconds","35 seconds"],0],
+    ["Who was nicknamed the Black Mamba?",["Kobe Bryant","Allen Iverson","Tracy McGrady","Dwyane Wade"],0],
+    ["Who won 11 NBA championships as a player?",["Bill Russell","Larry Bird","Bob Cousy","Kevin McHale"],0],
+    ["Stephen Curry is associated with which NBA team?",["Golden State Warriors","Phoenix Suns","Houston Rockets","Sacramento Kings"],0],
+    ["How many personal fouls disqualify an NBA player?",["6","5","7","4"],0],
+    ["Magic Johnson played most of his career with which team?",["Los Angeles Lakers","Boston Celtics","New York Knicks","Detroit Pistons"],0],
+    ["Who holds the NBA career assists record?",["John Stockton","Magic Johnson","Chris Paul","Jason Kidd"],0],
+    ["Where were the 1992 Olympic Dream Team games held?",["Barcelona","Seoul","Atlanta","Los Angeles"],0],
+    ["How many points is a free throw worth?",["1","2","3","0.5"],0],
+    ["Which team drafted LeBron James first overall in 2003?",["Cleveland Cavaliers","Miami Heat","Los Angeles Lakers","Chicago Bulls"],0],
+    ["What is it called when a player scores by jumping and dunking?",["Dunk","Alley-oop","Layup","Hook shot"],0],
+    ["What is a triple-double?",["Double digits in three statistical categories","Three three-pointers in a row","Three players scoring 10 points","Three steals in a quarter"],0],
+    ["Which NBA team plays at Madison Square Garden?",["New York Knicks","Brooklyn Nets","Boston Celtics","Philadelphia 76ers"],0],
+    ["Which team is famous for the Showtime era?",["Los Angeles Lakers","Utah Jazz","Indiana Pacers","Orlando Magic"],0],
+    ["What does NBA stand for?",["National Basketball Association","National Ball Association","North Basketball Alliance","National Basketball Athletics"],0],
+    ["What is a rebound?",["Recovering the ball after a missed shot","Passing behind your back","Blocking a pass","Scoring from the free-throw line"],0],
+    ["What is an assist?",["A pass directly leading to a made basket","A missed shot","A personal foul","A defensive rebound"],0],
+    ["Which team is nicknamed the Bulls?",["Chicago","Cleveland","Milwaukee","Toronto"],0],
+    ["Which NBA team plays in San Antonio?",["Spurs","Mavericks","Rockets","Pelicans"],0],
+    ["What is a layup?",["A close-range shot near the basket","A half-court shot","A defensive block","A free throw"],0],
+    ["What is an alley-oop?",["A pass finished with a jump and catch near the rim","A long defensive pass","A free throw routine","A jump ball"],0],
+    ["Which player is known as The Greek Freak?",["Giannis Antetokounmpo","Nikola Jokic","Luka Doncic","Joel Embiid"],0],
+    ["Nikola Jokic plays for which NBA team?",["Denver Nuggets","Miami Heat","Phoenix Suns","Chicago Bulls"],0],
+    ["Which team is associated with Dirk Nowitzki?",["Dallas Mavericks","Boston Celtics","Brooklyn Nets","Utah Jazz"],0],
+    ["What is a blocked shot?",["A defender stops a shot attempt","A player misses a free throw","A pass goes out of bounds","A player commits a traveling violation"],0],
+    ["What violation involves taking too many steps without dribbling?",["Traveling","Goaltending","Charging","Double foul"],0],
+    ["What is goaltending?",["Illegally interfering with a shot near the basket","Dribbling with both hands","Stepping out of bounds","Calling a timeout"],0],
+    ["How many quarters are in a regulation NBA game?",["4","2","3","5"],0],
+    ["How long is each regulation NBA quarter?",["12 minutes","10 minutes","15 minutes","8 minutes"],0],
+    ["Which team is known as the Heat?",["Miami","Orlando","Atlanta","Charlotte"],0],
+    ["Which team plays in Milwaukee?",["Bucks","Pistons","Cavaliers","Wizards"],0],
+    ["What is the WNBA?",["Women's National Basketball Association","World National Basketball Alliance","Women's National Baseball Association","Western National Basketball Association"],0],
+    ["What is a fast break?",["A quick offensive attack after gaining possession","A long timeout","A jump ball before the game","A defensive substitution"],0],
+    ["What is a steal?",["Taking possession from the opponent legally","Blocking a shot","Missing a pass","Scoring after a foul"],0],
+    ["Which player was famous for the skyhook?",["Kareem Abdul-Jabbar","Michael Jordan","Charles Barkley","Shaquille O'Neal"],0],
+    ["Which NBA team is based in Toronto?",["Raptors","Grizzlies","Kings","Clippers"],0],
+    ["What is the paint in basketball?",["The area near the basket inside the lane markings","The center circle","The three-point arc","The coaches' box"],0],
+    ["Which team is associated with Larry Bird?",["Boston Celtics","Los Angeles Lakers","Chicago Bulls","Phoenix Suns"],0],
+    ["What is a jump ball used for?",["To contest possession between opposing players","To award three points","To replace a free throw","To end a quarter"],0],
+    ["What is an offensive rebound?",["The offense recovers its own team's missed shot","The defense steals a pass","A player scores from half court","A player blocks a dunk"],0],
+    ["What is the term for scoring 3 points on a made basket plus a foul and free throw?",["Three-point play","Double-double","Fast break","Jump ball"],0],
+    ["What is a buzzer-beater?",["A shot made just before the game clock expires","A shot after a timeout","A free throw before tipoff","A shot that hits the backboard twice"],0]
+  ];
+
+  var ROUNDS=10, TIME=15000;
+  var $=function(id){return document.getElementById(id);};
+  var ball=$("ball"), net=$("net"), rim=$("rim");
+  var order,idx,score,streak,right,best=0,tm,t0,cur,locked;
+  var soundOn=false, audioCtx=null, roundPoints=0;
+
+  try {
+    best=parseInt(localStorage.getItem("hoops-best"),10)||0;
+  } catch(e) {}
+
+  // Add sound control without editing the HTML.
+  var soundBtn=document.createElement("button");
+  soundBtn.className="btn";
+  soundBtn.style.cssText="display:block;margin:0 auto 12px;padding:9px 12px;font-size:9px";
+  soundBtn.textContent="SOUND: OFF";
+  soundBtn.setAttribute("aria-pressed","false");
+  $("play").parentNode.insertBefore(soundBtn,$("play"));
+  soundBtn.addEventListener("click",function(){
+    soundOn=!soundOn;
+    soundBtn.textContent="SOUND: "+(soundOn?"ON":"OFF");
+    soundBtn.setAttribute("aria-pressed",String(soundOn));
+    if(soundOn) beep(660,.08);
+  });
+
+  function beep(freq,duration){
+    if(!soundOn)return;
+    try{
+      audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==="suspended")audioCtx.resume();
+      var osc=audioCtx.createOscillator();
+      var gain=audioCtx.createGain();
+      osc.type="square";
+      osc.frequency.value=freq;
+      gain.gain.setValueAtTime(.045,audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+      osc.connect(gain);gain.connect(audioCtx.destination);
+      osc.start();osc.stop(audioCtx.currentTime+duration);
+    }catch(e){}
+  }
+
+  function shuffle(a){
+    a=a.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1));
+      var t=a[i];a[i]=a[j];a[j]=t;
+    }
+    return a;
+  }
+
+  function hud(){
+    $("qn").textContent=Math.min(idx+1,ROUNDS)+"/"+ROUNDS;
+    $("score").textContent=score;
+    $("streak").textContent=streak;
+    $("best").textContent=best;
+  }
+
+  function start(){
+    clearInterval(tm);
+    order=shuffle(BANK).slice(0,ROUNDS);
+    idx=0;score=0;streak=0;right=0;roundPoints=0;
+    $("end").classList.add("hide");
+    $("play").classList.remove("hide");
+    $("bar").classList.remove("low");
+    resetBall();
+    next();
+  }
+
+  function resetBall(){
+    ball.setAttribute("cx",110);
+    ball.setAttribute("cy",225);
+  }
+
+  function next(){
+    if(idx>=ROUNDS)return finish();
+    var item=order[idx];
+    cur=shuffle(item[1].map(function(t,i){
+      return {t:t,c:i===item[2]};
+    }));
+    locked=false;
+    $("q").textContent=item[0];
+    var box=$("opts");
+    box.innerHTML="";
+    cur.forEach(function(o,i){
+      var bt=document.createElement("button");
+      bt.className="opt";bt.type="button";
+      var key=document.createElement("kbd");
+      key.textContent=String(i+1);
+      var label=document.createElement("span");
+      label.textContent=o.t;
+      bt.appendChild(key);bt.appendChild(label);
+      bt.addEventListener("click",function(){answer(i);});
+      box.appendChild(bt);
+    });
+    hud();
+    t0=Date.now();
+    clearInterval(tm);
+    tm=setInterval(tick,100);
+    tick();
+  }
+
+  function tick(){
+    var left=Math.max(0,TIME-(Date.now()-t0));
+    $("fill").style.width=(left/TIME*100)+"%";
+    $("bar").classList.toggle("low",left<5000);
+    if(left<=0&&!locked)answer(-1);
+  }
+
+  function answer(i){
+    if(locked)return;
+    locked=true;
+    clearInterval(tm);
+    var left=Math.max(0,TIME-(Date.now()-t0));
+    var btns=$("opts").children;
+    var ok=i>=0&&cur[i].c;
+
+    for(var k=0;k<btns.length;k++){
+      btns[k].disabled=true;
+      if(cur[k].c)btns[k].classList.add("ok");
+    }
+    if(i>=0&&!ok)btns[i].classList.add("bad");
+
+    if(ok){
+      streak++;
+      right++;
+      var base=100+Math.floor(left/1000)*5;
+      var combo=streak>=3?(streak-2)*25:0;
+      var buzzer=left<3000?100:0;
+      var pts=base+combo+buzzer;
+      score+=pts;
+      roundPoints+=pts;
+
+      $("score").classList.remove("pop");
+      void $("score").offsetWidth;
+      $("score").classList.add("pop");
+
+      var title="SWISH!";
+      if(streak>=10)title="LEGENDARY!";
+      else if(streak>=7)title="UNSTOPPABLE!";
+      else if(streak>=5)title="ON FIRE!";
+      else if(streak>=3)title="HEATING UP!";
+      else if(buzzer)title="BUZZER BEATER!";
+
+      var message=title+" +"+pts;
+      if(combo)message+=" | STREAK BONUS +"+combo;
+      if(buzzer)message+=" | BUZZER +100";
+      banner(message,"#56e39f");
+      beep(740,.09);
+      setTimeout(function(){beep(990,.12);},90);
+
+      shoot(true,function(){
+        if(streak>=3)confetti(streak>=5?40:20);
+        if(streak>=3||buzzer)celebrate();
+        setTimeout(advance,streak>=5?1100:750);
+      });
+    }else{
+      streak=0;
+      banner(i<0?"TIME'S UP!":"NO GOOD!","#ff4fa3");
+      beep(180,.2);
+      shoot(false,function(){setTimeout(advance,850);});
+    }
+    hud();
+  }
+
+  function celebrate(){
+    var court=document.querySelector(".court");
+    court.classList.remove("shake","glow");
+    void court.offsetWidth;
+    court.classList.add("shake","glow");
+  }
+
+  function confetti(amount){
+    var wrap=$(".courtwrap");
+    var colors=["#ffd166","#ff8a2b","#42e8f5","#56e39f","#ff4fa3","#ffffff"];
+    for(var i=0;i<amount;i++){
+      var p=document.createElement("i");
+      p.className="confetti-piece";
+      p.style.left=(Math.random()*96)+"%";
+      p.style.background=colors[Math.floor(Math.random()*colors.length)];
+      p.style.animationDelay=(Math.random()*.5)+"s";
+      p.style.animationDuration=(1+Math.random())+"s";
+      wrap.appendChild(p);
+      setTimeout(function(el){
+        if(el.parentNode)el.parentNode.removeChild(el);
+      },2600,p);
+    }
+  }
+
+  function advance(){
+    idx++;
+    resetBall();
+    next();
+  }
+
+  function banner(t,c){
+    var b=$("banner");
+    b.textContent=t;
+    b.style.color=c;
+    b.style.textShadow="0 0 10px "+c+",0 0 22px "+c;
+    b.classList.remove("show");
+    void b.offsetWidth;
+    b.classList.add("show");
+  }
+
+  function fly(p0,c,p1,ms,done){
+    var s=Date.now();
+    (function frame(){
+      var t=Math.min(1,(Date.now()-s)/ms),u=1-t;
+      ball.setAttribute("cx",u*u*p0[0]+2*u*t*c[0]+t*t*p1[0]);
+      ball.setAttribute("cy",u*u*p0[1]+2*u*t*c[1]+t*t*p1[1]);
+      if(t<1)requestAnimationFrame(frame);
+      else done();
+    })();
+  }
+
+  function shoot(made,done){
+    if(made){
+      fly([110,225],[135,-10],[200,98],650,function(){
+        net.classList.remove("swish");
+        void net.getBoundingClientRect();
+        net.classList.add("swish");
+        fly([200,98],[200,120],[200,200],300,done);
+      });
+    }else{
+      fly([110,225],[150,0],[234,96],650,function(){
+        rim.classList.remove("rimhit");
+        void rim.getBoundingClientRect();
+        rim.classList.add("rimhit");
+        fly([234,96],[300,30],[330,205],450,done);
+      });
+    }
+  }
+
+  function finish(){
+    clearInterval(tm);
+    var nb=score>best;
+    if(nb){
+      best=score;
+      try{localStorage.setItem("hoops-best",String(best));}catch(e){}
+    }
+
+    var rank=right>=10?"PERFECT GAME":
+             right>=9?"MVP":
+             right>=7?"ALL-STAR":
+             right>=5?"STARTER":
+             right>=3?"ROOKIE PRO":"ROOKIE";
+
+    var e=$("end");
+    $("play").classList.add("hide");
+    soundBtn.classList.add("hide");
+    e.classList.remove("hide");
+
+    e.innerHTML="";
+    var heading=document.createElement("h2");
+    heading.textContent=right===10?"CHAMPIONSHIP!!!":"FINAL BUZZER";
+    e.appendChild(heading);
+
+    var trophy=document.createElement("div");
+    trophy.className="champion";
+    trophy.textContent=right===10?"PERFECT 10 FOR 10!":
+                       right>=7?"YOU OWNED THE COURT!":
+                       right>=5?"SOLID PERFORMANCE!":"KEEP SHOOTING!";
+    e.appendChild(trophy);
+
+    var big=document.createElement("div");
+    big.className="big";
+    big.textContent=score;
+    e.appendChild(big);
+
+    var record=document.createElement("div");
+    record.className="record";
+    record.innerHTML="<p>"+right+" / "+ROUNDS+" CORRECT</p>"+
+      "<p>RANK: <b style='color:var(--orange)'></b></p>";
+    record.querySelector("b").textContent=rank;
+    e.appendChild(record);
+
+    var detail=document.createElement("p");
+    detail.textContent="Points earned this round: "+roundPoints;
+    e.appendChild(detail);
+
+    if(nb){
+      var pb=document.createElement("p");
+      pb.className="champion";
+      pb.textContent="NEW HIGH SCORE!";
+      e.appendChild(pb);
+      confetti(60);
+      beep(880,.15);
+      setTimeout(function(){beep(1100,.2);},150);
+      setTimeout(function(){beep(1320,.3);},330);
+    }else if(right===10){
+      confetti(60);
+    }
+
+    var again=document.createElement("button");
+    again.className="btn";
+    again.id="again";
+    again.textContent="PLAY AGAIN";
+    again.addEventListener("click",function(){
+      soundBtn.classList.remove("hide");
+      start();
+    });
+    e.appendChild(again);
+    again.focus();
+
+    $("fill").style.width="0%";
+    hud();
+  }
+
+  document.addEventListener("keydown",function(e){
+    var n=parseInt(e.key,10);
+    if(n>=1&&n<=4&&!locked&&!$("play").classList.contains("hide")){
+      answer(n-1);
+    }
+  });
+
+  start();
+})();
+</script>
+
+</body>
+</html>

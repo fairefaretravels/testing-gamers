@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SENSTACK NEON RUN | Crystal Hummingbird Edition</title>
+<meta name="description" content="SENSTACK NEON RUN: three neon levels and a Crystal Hummingbird boss fight. Keyboard, touch and gamepad supported.">
+<meta name="theme-color" content="#0b1012">
+<style>
+:root{--green:#56e39f;--cyan:#42e8f5;--purple:#a878ff;--gold:#ffd166;--bg:#090e12;--text:#f3f7f8;--muted:#a4b2b7;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{min-height:100svh;display:flex;justify-content:center;padding:12px;padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 50% 0%,#172737 0,#090e12 65%)}
+.app{width:min(100%,1100px);display:flex;flex-direction:column;gap:10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 2px}
+.brand{font-size:clamp(17px,3vw,24px);font-weight:900;letter-spacing:1.5px;font-style:italic}.brand b{color:var(--green)}.tag{font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:800;text-align:right}
+.hud{display:flex;gap:8px;flex-wrap:wrap}.stat{flex:1;min-width:78px;padding:9px 12px;border:1px solid #2b414a;background:#101a20;border-radius:8px}.stat label{display:block;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:1.5px;margin-bottom:4px}.stat strong{font-size:16px;color:var(--cyan);font-variant-numeric:tabular-nums}
+.game-shell{position:relative;overflow:hidden;border:1px solid #35515b;border-radius:12px;background:#081017;box-shadow:0 15px 50px #0008}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#071017d9,#101325e8);text-align:center}
+.overlay.hidden{display:none}.dialog{width:min(100%,460px);padding:clamp(18px,4vw,34px);border:1px solid #3c5a61;border-radius:14px;background:linear-gradient(145deg,#14252bfa,#111522fa);box-shadow:0 0 35px #42e8f522}
+.kicker{color:var(--green);font-size:10px;font-weight:900;letter-spacing:3px}.dialog h1{margin:12px 0 8px;font-size:clamp(30px,7vw,58px);line-height:.92;font-weight:900;font-style:italic;letter-spacing:-1.5px}.dialog h1 span{color:var(--cyan)}.dialog p{color:#b5c4c9;font-size:13px;line-height:1.7;margin:14px 0 20px}
+button{font:inherit;cursor:pointer;touch-action:manipulation}.primary{border:0;border-radius:7px;padding:13px 22px;background:var(--green);color:#07110d;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 5px 0 #24784d}.primary:active{transform:translateY(2px);box-shadow:0 3px 0 #24784d}.small-button{border:1px solid #3b535b;border-radius:7px;padding:9px 12px;color:var(--text);background:#152128;font-size:11px;font-weight:800}
+.help{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:11px;line-height:1.6;padding:0 2px}.help strong{color:var(--gold)}
+.controls{display:none;align-items:center;justify-content:space-between;gap:14px;padding:7px 2px 2px;user-select:none;-webkit-user-select:none}
+.pad{display:flex;gap:10px}.control{width:clamp(58px,15vw,78px);height:clamp(54px,13vw,68px);border:1px solid #3d646a;border-radius:12px;background:linear-gradient(145deg,#17262e,#10171e);color:var(--cyan);font-size:24px;font-weight:900;touch-action:none}.control.jump{width:clamp(84px,22vw,120px);color:#10140d;background:linear-gradient(145deg,#ffe49b,#ffd166);border-color:#ffe5a1;font-size:13px;letter-spacing:1px}.control.active{transform:scale(.96);background:#24434a}
+.footer{text-align:center;color:#64777d;font-size:9px;letter-spacing:2px;font-weight:800;padding:5px}
+
+/* ---------- Splash screens ---------- */
+.splash{position:fixed;inset:0;z-index:100;background:#05080c;overflow:hidden}
+/* ID selectors below set display, so each needs its own .hidden rule (this was the bug that left screen 1 covering the game) */
+.splash.hidden,#splash1.hidden,#splash2.hidden,#splash3.hidden{display:none}
+#splash1{cursor:pointer;display:flex;align-items:center;justify-content:center}
+.s1-bg{position:absolute;inset:-30px;background:url("neon-run.jpg") center/cover no-repeat;filter:blur(26px) brightness(.45)}
+.s1-img{position:relative;width:100%;height:100%;object-fit:contain;display:block}
+.s1-hint{position:absolute;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));text-align:center;font-size:clamp(11px,2.4vw,15px);font-weight:900;letter-spacing:4px;color:#fff;text-shadow:0 0 12px #42e8f5,0 2px 6px #000;animation:blink 1.3s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#splash2{background:radial-gradient(ellipse at 50% 0%,#1a2c40 0,#05080c 70%)}
+.s2-scroll{position:absolute;inset:0;overflow-y:auto;display:flex;padding:clamp(12px,3vw,28px);padding-top:calc(clamp(12px,3vw,28px) + env(safe-area-inset-top,0px));padding-bottom:calc(clamp(12px,3vw,28px) + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+.s2-panel{margin:auto;width:min(100%,780px);padding:clamp(18px,4vw,36px);border:1px solid #3c5a61;border-radius:16px;background:#0a1218e6;box-shadow:0 0 40px #42e8f533,0 20px 60px #000a}
+.s2-panel h2{margin:10px 0 4px;font-size:clamp(24px,5.5vw,42px);line-height:1;font-style:italic;font-weight:900;letter-spacing:-1px}.s2-panel h2 span{color:var(--cyan)}
+.s2-panel .sub{color:var(--gold);font-weight:900;font-size:clamp(13px,2.6vw,16px);margin:10px 0 14px;font-style:italic}
+.s2-panel p{color:#c6d3d8;font-size:clamp(12.5px,2.2vw,14.5px);line-height:1.7;margin:0 0 11px}
+.s2-panel .tagline{color:var(--green);font-weight:900;letter-spacing:1px;margin-top:14px;font-size:clamp(13px,2.6vw,16px)}
+.s2-panel h3{margin:20px 0 10px;font-size:11px;letter-spacing:3px;color:var(--green);border-top:1px solid #2b414a;padding-top:16px}
+.how{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:0;padding:0;list-style:none}
+.how li{padding:10px 12px;border:1px solid #2b414a;background:#101a20;border-radius:9px;color:#b5c4c9;font-size:12px;line-height:1.55}
+.how b{display:block;color:var(--cyan);font-size:10px;letter-spacing:2px;margin-bottom:3px}
+.s2-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:22px}
+/* Splash 3: full-screen video */
+#splash3{background:#000}
+.s3-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.s3-bar{position:absolute;left:0;right:0;bottom:0;display:flex;gap:10px;justify-content:center;align-items:center;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,transparent,#000b)}
+@media(max-width:650px){body{padding:9px}.controls{display:flex}.help{font-size:10px}.stat{padding:8px 9px}.stat strong{font-size:14px}canvas{aspect-ratio:4/3}.dialog p{font-size:12px}.how{grid-template-columns:1fr}}
+@media(hover:none){.controls{display:flex}}
+@media(prefers-reduced-motion:reduce){.s1-hint{animation:none}}
+</style></head>
+<body>
+
+<!-- Screen 1: title image -->
+<div class="splash" id="splash1" role="button" tabindex="0" aria-label="Neon Run title screen. Tap, click or press any key to continue.">
+<div class="s1-bg" aria-hidden="true"></div>
+<img class="s1-img" src="neon-run.jpg" alt="NEON RUN">
+<div class="s1-hint">TAP · CLICK · PRESS ANY KEY</div>
+</div>
+
+<!-- Screen 2: story + instructions -->
+<div class="splash hidden" id="splash2" role="dialog" aria-label="Story and instructions">
+<div class="s2-scroll"><div class="s2-panel">
+<div class="kicker">THE LEGEND</div>
+<h2>NEON RUN: <span>The Crystal Hummingbird</span></h2>
+<div class="sub">In a world where light is power, darkness is taking over.</div>
+<p>Long ago, the city of Neon was powered by the Crystal Heart, a mysterious source of energy hidden deep beneath the streets. But when the Crystal Hummingbird a powerful guardian became corrupted by a dark force, it shattered the Crystal Heart and stole its fragments.</p>
+<p>Now the city is falling apart. Neon lights are fading, portals are opening, and dangerous creatures are spreading across the world.</p>
+<p>You are the last runner capable of restoring the Crystal Heart. To save Neon, you must race through dangerous levels, defeat corrupted enemies, and collect the lost crystal fragments.</p>
+<p>But at the end of your journey stands the Crystal Hummingbird.</p>
+<p>Once a protector, now a deadly enemy, it guards the final piece of the Crystal Heart. You must defeat it—not to destroy the guardian, but to free it from the darkness.</p>
+<p class="tagline">Run fast. Fight hard. Restore the light.</p>
+<h3>HOW TO PLAY</h3>
+<ul class="how">
+<li><b>MOVE</b>A / D or ← → keys, gamepad stick / D-pad, or the on-screen arrows.</li>
+<li><b>JUMP</b>W, ↑ or SPACE, gamepad A / ✕, or the JUMP button on touch screens.</li>
+<li><b>COLLECT</b>Grab the glowing energy orbs for points and a bonus at each portal.</li>
+<li><b>DEFEAT</b>Stomp sentry bots from above. Avoid the neon spikes and don't fall.</li>
+<li><b>PORTAL</b>Reach the portal at the end of each of the three levels.</li>
+<li><b>BOSS</b>Dodge the Hummingbird's shards and dive. When it crashes, stomp it. Five hits wins!</li>
+</ul>
+<div class="s2-actions">
+<button class="primary" id="splashContinue" type="button">CONTINUE ▶</button>
+</div>
+</div></div>
+</div>
+
+<!-- Screen 3: story video -->
+<div class="splash hidden" id="splash3" role="dialog" aria-label="Story video">
+<video class="s3-video" id="storyVideo" src="cb.mp4" playsinline preload="auto"></video>
+<div class="s3-bar">
+<button class="small-button" id="splashSound" type="button" aria-pressed="false">🔊 SOUND ON</button>
+<button class="primary" id="splashStart" type="button">SKIP / START ▶</button>
+</div>
+</div>
+
+<div class="app">
+<header class="top"><div class="brand"><b>SENSTACK</b> NEON RUN</div><div class="tag">ARCADE SYSTEM // 01</div></header>
+<section class="hud" aria-label="Game status">
+<div class="stat"><label>ENERGY</label><strong id="lives">♥ ♥ ♥</strong></div>
+<div class="stat"><label>ENERGY ORBS</label><strong id="coins">00 / 00</strong></div>
+<div class="stat"><label>SCORE</label><strong id="score">0000</strong></div>
+<div class="stat"><label>LEVEL</label><strong id="level">01 / 03</strong></div>
+</section>
+<main class="game-shell">
+<canvas id="game" width="960" height="540" aria-label="Neon platform game. Arrow keys or A/D to move, space or up to jump. Gamepads supported."></canvas>
+<section class="overlay" id="overlay"><div class="dialog">
+<div class="kicker" id="kicker">SENSTACK ARCADE PRESENTS</div>
+<h1 id="headline">NEON<br><span>RUN</span></h1>
+<p id="message"></p>
+<button class="primary" id="start">START GAME</button>
+</div></section>
+</main>
+<div class="help"><span><strong>MOVE</strong> A / D, ← → or stick &nbsp; <strong>JUMP</strong> W / ↑ / SPACE or A / ✕</span><button class="small-button" id="restart">RESTART</button></div>
+<section class="controls" aria-label="Touch controls">
+<div class="pad"><button class="control" data-control="left" aria-label="Move left">←</button><button class="control" data-control="right" aria-label="Move right">→</button></div>
+<button class="control jump" data-control="jump" aria-label="Jump">JUMP ↑</button>
+</section>
+<footer class="footer">STRATEGY · EXECUTION · NETWORK</footer>
+</div>
+<script>
+(() => {
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const overlay=document.getElementById('overlay'),startBtn=document.getElementById('start'),restartBtn=document.getElementById('restart');
+const headline=document.getElementById('headline'),message=document.getElementById('message'),kicker=document.getElementById('kicker');
+const ui={lives:document.getElementById('lives'),coins:document.getElementById('coins'),score:document.getElementById('score'),level:document.getElementById('level')};
+const W=960,H=540,GRAVITY=1850,BOSS=3;
+let state='menu',levelIndex=0,score=0,lives=3,levelCoins=0,totalCoins=0,cameraX=0,lastTime=0,elapsed=0;
+let player,platforms=[],orbs=[],enemies=[],hazards=[],goal=null,worldWidth=3000,particles=[],boss=null,shards=[];
+const keys={left:false,right:false,jump:false},pad={left:false,right:false};
+let prevAct=false;
+
+/* ---------- Splash screens ----------
+   0 = title image, 1 = story + instructions, 2 = story video, 3 = game */
+let splashStage=0;
+const sp1=document.getElementById('splash1'),sp2=document.getElementById('splash2'),sp3=document.getElementById('splash3'),vid=document.getElementById('storyVideo');
+const sndBtn=document.getElementById('splashSound'),splashStart=document.getElementById('splashStart'),splashContinue=document.getElementById('splashContinue');
+function updateSnd(){const on=!vid.muted;sndBtn.textContent=on?'🔊 SOUND ON':'🔇 SOUND OFF';sndBtn.setAttribute('aria-pressed',String(!on));}
+function showStory(){
+ if(splashStage!==0)return;
+ splashStage=1;sp1.classList.add('hidden');sp2.classList.remove('hidden');
+ splashContinue.focus({preventScroll:true});
+}
+function showVideo(){
+ if(splashStage!==1)return;
+ splashStage=2;sp2.classList.add('hidden');sp3.classList.remove('hidden');
+ vid.muted=false;vid.currentTime=0;
+ const p=vid.play();
+ if(p&&p.catch)p.catch(()=>{vid.muted=true;const q=vid.play();if(q&&q.catch)q.catch(()=>{});updateSnd();});
+ updateSnd();
+ splashStart.focus({preventScroll:true});
+}
+function endSplash(){
+ if(splashStage!==2)return;
+ splashStage=3;vid.pause();sp3.classList.add('hidden');
+ prevAct=true;startBtn.focus({preventScroll:true});
+}
+sp1.addEventListener('click',showStory);
+splashContinue.addEventListener('click',showVideo);
+splashStart.addEventListener('click',endSplash);
+vid.addEventListener('ended',endSplash);
+vid.addEventListener('error',()=>{if(splashStage===2)endSplash();});
+sndBtn.addEventListener('click',()=>{vid.muted=!vid.muted;updateSnd();});
+
+const levelSpecs=[
+ {width:3000, platforms:[[0,480,480,60],[540,440,180,22],[790,395,170,22],[1030,455,220,22],[1330,410,180,22],[1580,360,190,22],[1840,430,220,22],[2140,385,180,22],[2400,445,190,22],[2680,400,320,22]],orbs:[[230,430],[600,390],[850,345],[1100,405],[1380,360],[1640,310],[1900,380],[2200,335],[2470,395],[2780,350]],enemies:[[660,410,560,740],[1450,380,1360,1500],[2220,355,2160,2300]],hazards:[[485,480,55,60],[720,480,70,60],[960,480,70,60],[1250,480,80,60],[1510,480,70,60],[1800,480,50,60],[2060,480,80,60],[2330,480,70,60],[2590,480,90,60]],goal:2850},
+ {width:3400,platforms:[[0,480,370,60],[430,425,190,22],[700,370,160,22],[940,430,190,22],[1210,380,200,22],[1500,330,180,22],[1760,410,190,22],[2020,360,200,22],[2300,310,180,22],[2540,400,210,22],[2820,350,180,22],[3090,430,310,22]],orbs:[[150,430],[480,375],[750,320],[1000,380],[1280,330],[1550,280],[1820,360],[2080,310],[2360,260],[2600,350],[2880,300],[3200,380]],enemies:[[500,395,455,580],[1320,350,1240,1360],[1810,380,1780,1910],[2600,370,2580,2700],[3160,400,3120,3300]],hazards:[[370,480,60,60],[620,480,80,60],[860,480,80,60],[1130,480,80,60],[1410,480,90,60],[1680,480,80,60],[1950,480,70,60],[2220,480,80,60],[2480,480,60,60],[2750,480,70,60],[3000,480,90,60]],goal:3280},
+ {width:3800,platforms:[[0,480,400,60],[460,430,170,22],[700,375,180,22],[960,425,180,22],[1220,365,190,22],[1500,315,180,22],[1760,390,200,22],[2040,340,190,22],[2300,285,180,22],[2550,365,200,22],[2830,315,190,22],[3090,390,190,22],[3370,440,430,22]],orbs:[[140,430],[500,380],[750,325],[1010,375],[1280,315],[1550,265],[1820,340],[2090,290],[2360,235],[2600,315],[2880,265],[3140,340],[3470,390],[3660,390]],enemies:[[520,400,470,580],[1050,395,990,1090],[1580,285,1530,1630],[1870,360,1800,1920],[2350,255,2320,2420],[2910,285,2850,2950],[3500,410,3430,3620]],hazards:[[400,480,60,60],[630,480,70,60],[880,480,80,60],[1140,480,80,60],[1410,480,90,60],[1680,480,80,60],[1960,480,80,60],[2230,480,70,60],[2490,480,60,60],[2760,480,70,60],[3020,480,70,60],[3280,480,90,60]],goal:3660},
+ {width:960,platforms:[[0,480,960,60],[130,370,160,22],[670,370,160,22]],orbs:[[210,320],[750,320],[480,430]],enemies:[],hazards:[],goal:null}
+];
+function buildLevel(index){
+ const s=levelSpecs[index];worldWidth=s.width;
+ platforms=s.platforms.map(([x,y,w,h])=>({x,y,w,h}));
+ orbs=s.orbs.map(([x,y])=>({x,y,r:10,got:false,phase:Math.random()*6}));
+ enemies=s.enemies.map(([x,y,min,max],i)=>({x,y,w:30,h:34,min,max,dir:i%2?-1:1,speed:70+i%3*15,alive:true,phase:i}));
+ hazards=s.hazards.map(([x,y,w,h])=>({x,y,w,h}));
+ goal=s.goal?{x:s.goal,y:platforms[platforms.length-1].y-70,w:42,h:70}:null;
+ boss=index===BOSS?{x:442,y:-80,w:76,h:56,hp:5,max:5,state:'enter',t:0,tx:0,shard:1.5,flap:0,grace:0}:null;
+ shards=[];
+ player={x:40,y:420,w:28,h:42,vx:0,vy:0,onGround:false,invuln:0,face:1,checkpoint:40};
+ cameraX=0;levelCoins=0;particles=[];
+ ui.level.textContent=index===BOSS?'BOSS':String(index+1).padStart(2,'0')+' / 03';
+ updateHud();
+}
+function updateHud(){
+ ui.lives.textContent=lives>0?'♥ '.repeat(lives).trim():'0';
+ ui.coins.textContent=String(levelCoins).padStart(2,'0')+' / '+String(orbs.length).padStart(2,'0');
+ ui.score.textContent=String(score).padStart(4,'0');
+}
+function showOverlay(type){
+ state=type;overlay.classList.remove('hidden');headline.style.fontSize='';
+ if(type==='menu'){kicker.textContent='SENSTACK ARCADE PRESENTS';headline.innerHTML='NEON<br><span>RUN</span>';message.textContent='Sprint across neon platforms, collect energy orbs, avoid the sentry bots and reach the portal. Clear three levels, then face the Crystal Hummingbird.';startBtn.textContent='START GAME';}
+ if(type==='dead'){kicker.textContent='MISSION FAILED';headline.innerHTML='GAME<br><span>OVER</span>';message.textContent=levelIndex===BOSS?'The Crystal Hummingbird won this round. Score: '+score+'. Energy restored: rematch!':'Your energy ran out. Your score is '+score+'. Restart and make another run.';startBtn.textContent=levelIndex===BOSS?'REMATCH':'TRY AGAIN';}
+ if(type==='win'){kicker.textContent='MISSION COMPLETE';headline.innerHTML='YOU<br><span>WIN</span>';message.textContent='The Crystal Hummingbird has shattered and the neon sky is safe. Final score: '+score+'.';startBtn.textContent='PLAY AGAIN';}
+ if(type==='level'){kicker.textContent='SECTOR CLEARED';headline.innerHTML='LEVEL<br><span>'+String(levelIndex+1).padStart(2,'0')+'</span>';message.textContent='Portal reached. Energy collected: '+levelCoins+' / '+orbs.length+'. '+(levelIndex===2?'Something huge is waiting beyond the final portal...':'Prepare for the next sector.');startBtn.textContent='NEXT LEVEL';}
+ if(type==='boss'){kicker.textContent='WARNING // SECTOR 04';headline.innerHTML='CRYSTAL<br><span>HUMMINGBIRD</span>';headline.style.fontSize='clamp(26px,6vw,44px)';message.textContent='The guardian of the neon sky. Dodge its falling shards and its dive. When it crashes to the ground, stomp it from above. Five hits to win. Energy restored.';startBtn.textContent='FIGHT';}
+}
+function startGame(){
+ if(state==='level'){levelIndex++;buildLevel(levelIndex);if(levelIndex===BOSS){lives=3;updateHud();showOverlay('boss');return;}}
+ else if(state==='boss'){}
+ else if(state==='dead'&&levelIndex===BOSS){lives=3;buildLevel(BOSS);}
+ else if(state==='win'||state==='dead'||state==='menu'){levelIndex=0;score=0;lives=3;totalCoins=0;buildLevel(0);}
+ state='playing';overlay.classList.add('hidden');keys.left=keys.right=keys.jump=false;lastTime=performance.now();
+}
+startBtn.addEventListener('click',startGame);
+restartBtn.addEventListener('click',()=>{levelIndex=0;score=0;lives=3;totalCoins=0;buildLevel(0);showOverlay('menu');});
+function jump(){if(state==='playing'&&player.onGround){player.vy=-650;player.onGround=false;burst(player.x+player.w/2,player.y+player.h,'#42e8f5',7);}}
+function burst(x,y,color,count){for(let i=0;i<count;i++)particles.push({x,y,vx:(Math.random()-.5)*230,vy:(Math.random()-.8)*210,life:.35+Math.random()*.35,color});}
+function hitPlayer(){
+ if(player.invuln>0)return;
+ lives--;player.invuln=1.4;burst(player.x+player.w/2,player.y+player.h/2,'#ff5d8f',16);
+ if(lives<=0){updateHud();showOverlay('dead');return;}
+ player.x=Math.max(player.checkpoint,player.x-100);player.y=300;player.vx=0;player.vy=0;updateHud();
+}
+function rects(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+function updateBoss(dt){
+ const b=boss,px=player.x+player.w/2-b.w/2;
+ b.t+=dt;b.flap+=dt*(b.state==='stun'?4:14);if(b.grace>0)b.grace-=dt;
+ if(b.state==='enter'){b.y+=150*dt;if(b.y>=130){b.state='hover';b.t=0;}}
+ else if(b.state==='hover'){
+  b.x+=Math.sign(px-b.x)*Math.min(Math.abs(px-b.x),(100+(b.max-b.hp)*20)*dt);
+  b.y=130+Math.sin(elapsed*3)*14;
+  b.shard-=dt;if(b.shard<=0){shards.push({x:b.x+b.w/2-6,y:b.y+b.h,w:12,h:22});b.shard=1.4-(b.max-b.hp)*.15;}
+  if(b.t>3.2){b.state='tele';b.t=0;}
+ }
+ else if(b.state==='tele'){if(b.t>.8){b.tx=px;b.state='dive';b.t=0;}}
+ else if(b.state==='dive'){
+  b.x+=(b.tx-b.x)*Math.min(1,dt*6);b.y+=640*dt;
+  if(b.y+b.h>=480){b.y=480-b.h;b.state='stun';b.t=0;burst(b.x+b.w/2,480,'#ffd166',20);}
+ }
+ else if(b.state==='stun'){if(b.t>2.4){b.state='rise';b.t=0;}}
+ else if(b.state==='rise'){b.y-=260*dt;if(b.y<=130){b.y=130;b.state='hover';b.t=0;}}
+ b.x=Math.max(0,Math.min(W-b.w,b.x));
+ if(b.state!=='enter'&&b.grace<=0&&rects(player,b)){
+  if(b.state==='stun'&&player.vy>0&&player.y+player.h-b.y<26){
+   b.hp--;score+=500;player.vy=-520;player.onGround=false;b.grace=.6;burst(b.x+b.w/2,b.y,'#42e8f5',22);updateHud();
+   if(b.hp<=0){score+=1000;updateHud();showOverlay('win');return;}
+   b.state='rise';b.t=0;
+  }else hitPlayer();
+ }
+ if(state!=='playing')return;
+ for(const s of shards){s.y+=270*dt;if(rects(player,s)){s.y=999;hitPlayer();if(state!=='playing')return;}}
+ shards=shards.filter(s=>s.y<480);
+}
+function update(dt){
+ if(state!=='playing')return;
+ elapsed+=dt;
+ const speed=285;
+ player.vx=((keys.right||pad.right)?1:0)-((keys.left||pad.left)?1:0);
+ if(player.vx!==0)player.face=Math.sign(player.vx);
+ player.vx*=speed;
+ if(keys.jump){jump();keys.jump=false;}
+ player.vy+=GRAVITY*dt;player.vy=Math.min(player.vy,900);
+ const oldY=player.y;
+ player.x+=player.vx*dt;
+ player.x=Math.max(0,Math.min(worldWidth-player.w,player.x));
+ for(const p of platforms){if(rects(player,p)){if(player.vx>0)player.x=p.x-player.w;else if(player.vx<0)player.x=p.x+p.w;}}
+ player.y+=player.vy*dt;player.onGround=false;
+ for(const p of platforms){
+  if(rects(player,p)){
+   if(player.vy>=0&&oldY+player.h<=p.y+8){player.y=p.y-player.h;player.vy=0;player.onGround=true;}
+   else if(player.vy<0&&oldY>=p.y+p.h-5){player.y=p.y+p.h;player.vy=0;}
+  }
+ }
+ if(player.y>H+100){hitPlayer();if(state!=='playing')return;}
+ if(player.invuln>0)player.invuln-=dt;
+ for(const orb of orbs){if(!orb.got){const dx=(player.x+player.w/2)-orb.x,dy=(player.y+player.h/2)-orb.y;if(dx*dx+dy*dy<31*31){orb.got=true;levelCoins++;totalCoins++;score+=100;burst(orb.x,orb.y,'#ffd166',10);updateHud();}}}
+ for(const e of enemies){if(!e.alive)continue;e.x+=e.dir*e.speed*dt;if(e.x<e.min){e.x=e.min;e.dir=1;}if(e.x+e.w>e.max){e.x=e.max-e.w;e.dir=-1;}
+  if(rects(player,e)){if(player.vy>100&&player.y+player.h-e.y<20){e.alive=false;player.vy=-420;score+=200;burst(e.x+e.w/2,e.y,'#a878ff',12);updateHud();}else hitPlayer();}
+ }
+ for(const h of hazards){if(rects(player,{x:h.x,y:h.y-18,w:h.w,h:22})){hitPlayer();break;}}
+ if(state!=='playing')return;
+ if(boss){updateBoss(dt);if(state!=='playing')return;}
+ if(goal&&player.x>goal.x-10){score+=levelCoins*25;updateHud();showOverlay('level');}
+ const target=Math.max(0,Math.min(worldWidth-W,player.x-W*.34));cameraX+=(target-cameraX)*Math.min(1,dt*7);
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=300*dt;p.life-=dt;}particles=particles.filter(p=>p.life>0);
+}
+function drawBoss(){
+ const b=boss,face=(player.x+player.w/2<b.x+b.w/2)?-1:1,tele=b.state==='tele',stun=b.state==='stun';
+ const col=stun?'#ffd166':tele?'#ff5d8f':'#42e8f5',f=Math.sin(b.flap)*.5;
+ ctx.save();ctx.translate(b.x+b.w/2+(tele?(Math.random()-.5)*8:0),b.y+b.h/2);ctx.scale(face,1);
+ ctx.shadowColor=col;ctx.shadowBlur=stun?26:18;
+ ctx.fillStyle='#a878ff99';
+ ctx.beginPath();ctx.moveTo(-8,-6);ctx.lineTo(-62,-34-f*50);ctx.lineTo(-24,10);ctx.closePath();ctx.fill();
+ ctx.beginPath();ctx.moveTo(4,-6);ctx.lineTo(48,-40-f*50);ctx.lineTo(24,10);ctx.closePath();ctx.fill();
+ ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(0,0,34,22,0,0,Math.PI*2);ctx.fill();
+ ctx.beginPath();ctx.moveTo(-30,4);ctx.lineTo(-58,22);ctx.lineTo(-24,14);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#d9fff0';ctx.beginPath();ctx.moveTo(30,-4);ctx.lineTo(70,2);ctx.lineTo(30,6);ctx.closePath();ctx.fill();
+ ctx.shadowBlur=0;ctx.fillStyle='#10202a';ctx.beginPath();ctx.arc(18,-6,4,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#ffffff66';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-14,-10);ctx.lineTo(0,4);ctx.lineTo(14,-8);ctx.stroke();
+ ctx.restore();
+ if(tele){ctx.fillStyle='#ff5d8f22';ctx.fillRect(player.x+player.w/2-b.w/2,0,b.w,480);}
+}
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#0d1728');sky.addColorStop(1,'#080d13');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ for(let i=0;i<70;i++){const x=((i*137-cameraX*.12)%(W+20)+W+20)%(W+20),y=(i*71)%330;ctx.fillStyle=i%3===0?'#42e8f588':'#c5d0d566';ctx.fillRect(x,y,i%7===0?3:1.5,1.5);}
+ for(let i=0;i<24;i++){const bw=35+(i*17)%55,bh=60+(i*31)%130,x=((i*70-cameraX*.25)%(W+90)+W+90)%(W+90)-10;ctx.fillStyle='#101f2a';ctx.fillRect(x,H-bh,bw,bh);ctx.fillStyle='#42e8f51c';for(let yy=H-bh+12;yy<H-8;yy+=17)for(let xx=x+8;xx<x+bw-5;xx+=14)ctx.fillRect(xx,yy,4,5);}
+ ctx.save();ctx.translate(-cameraX,0);
+ ctx.strokeStyle='#42e8f52b';ctx.lineWidth=1;for(let x=0;x<worldWidth;x+=80){ctx.beginPath();ctx.moveTo(x,480);ctx.lineTo(x+120,540);ctx.stroke();}
+ for(const h of hazards){ctx.fillStyle='#351a32';ctx.fillRect(h.x,h.y,h.w,h.h);ctx.fillStyle='#ff4f9a';ctx.shadowColor='#ff4f9a';ctx.shadowBlur=12;for(let x=h.x+4;x<h.x+h.w-4;x+=18){ctx.beginPath();ctx.moveTo(x,h.y+14);ctx.lineTo(x+9,h.y);ctx.lineTo(x+18,h.y+14);ctx.fill();}ctx.shadowBlur=0;}
+ for(const p of platforms){ctx.fillStyle='#18252f';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#56e39f';ctx.shadowColor='#56e39f';ctx.shadowBlur=12;ctx.fillRect(p.x,p.y,p.w,3);ctx.shadowBlur=0;ctx.fillStyle='#42e8f51f';ctx.fillRect(p.x,p.y+7,p.w,p.h-7);ctx.strokeStyle='#42e8f533';ctx.strokeRect(p.x+.5,p.y+.5,p.w-1,p.h-1);}
+ for(const o of orbs){if(o.got)continue;const pulse=1+Math.sin(elapsed*5+o.phase)*.12;ctx.save();ctx.translate(o.x,o.y);ctx.scale(pulse,pulse);ctx.shadowColor='#ffd166';ctx.shadowBlur=17;ctx.fillStyle='#ffd166';ctx.beginPath();ctx.arc(0,0,o.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff4bf';ctx.beginPath();ctx.arc(-2,-3,3,0,Math.PI*2);ctx.fill();ctx.restore();}
+ for(const e of enemies){if(!e.alive)continue;ctx.save();ctx.translate(e.x,e.y);ctx.shadowColor='#a878ff';ctx.shadowBlur=13;ctx.fillStyle='#542c7b';ctx.fillRect(0,5,e.w,e.h-5);ctx.shadowBlur=0;ctx.fillStyle='#a878ff';ctx.fillRect(4,0,e.w-8,10);ctx.fillStyle='#42e8f5';ctx.fillRect(e.dir>0?17:5,13,8,5);ctx.fillStyle='#130e21';ctx.fillRect(5,e.h-7,e.w-10,7);ctx.restore();}
+ if(goal){ctx.save();ctx.translate(goal.x,goal.y);ctx.shadowColor='#42e8f5';ctx.shadowBlur=22;ctx.strokeStyle='#42e8f5';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(goal.w/2,goal.h/2,goal.w/2-3,goal.h/2-3,0,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;ctx.strokeStyle='#a878ff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(goal.w/2,goal.h/2,goal.w/2-10,goal.h/2-10,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#42e8f522';ctx.fillRect(10,8,goal.w-20,goal.h-16);ctx.restore();}
+ for(const s of shards){ctx.save();ctx.shadowColor='#42e8f5';ctx.shadowBlur=12;ctx.fillStyle='#8ff3ff';ctx.beginPath();ctx.moveTo(s.x+6,s.y+s.h);ctx.lineTo(s.x,s.y+4);ctx.lineTo(s.x+6,s.y);ctx.lineTo(s.x+12,s.y+4);ctx.closePath();ctx.fill();ctx.restore();}
+ if(boss)drawBoss();
+ if(player&&!(player.invuln>0&&Math.floor(elapsed*15)%2===0)){ctx.save();ctx.translate(player.x,player.y);ctx.shadowColor='#56e39f';ctx.shadowBlur=16;ctx.fillStyle='#56e39f';ctx.fillRect(3,7,player.w-6,player.h-7);ctx.shadowBlur=0;ctx.fillStyle='#d9fff0';ctx.fillRect(7,0,player.w-14,12);ctx.fillStyle='#0b2220';ctx.fillRect(player.face>0?16:5,14,8,6);ctx.fillStyle='#a878ff';ctx.fillRect(4,player.h-5,8,5);ctx.fillRect(player.w-12,player.h-5,8,5);ctx.restore();}
+ for(const p of particles){ctx.globalAlpha=Math.max(0,p.life*2);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,4,4);ctx.globalAlpha=1;}
+ ctx.restore();
+ if(boss){
+  const bw=360,bx=W/2-bw/2,by=20,r=Math.max(0,boss.hp/boss.max);
+  ctx.fillStyle='#000a';ctx.fillRect(bx-4,by-4,bw+8,26);
+  ctx.fillStyle='#2a1a2e';ctx.fillRect(bx,by,bw,18);
+  ctx.fillStyle=r>.4?'#42e8f5':'#ff5d8f';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;ctx.fillRect(bx,by,bw*r,18);ctx.shadowBlur=0;
+  ctx.fillStyle='#f3f7f8';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText('CRYSTAL HUMMINGBIRD',W/2,by+13);ctx.textAlign='start';
+  if(boss.state==='stun'){ctx.fillStyle='#ffd166';ctx.font='bold 14px Arial';ctx.textAlign='center';ctx.fillText('STOMP IT!',W/2,70);ctx.textAlign='start';}
+ }
+ const progress=boss?1-boss.hp/boss.max:(player&&goal?Math.max(0,Math.min(1,player.x/goal.x)):0);ctx.fillStyle='#1a2b32';ctx.fillRect(0,0,W,4);ctx.fillStyle='#56e39f';ctx.fillRect(0,0,W*progress,4);
+}
+function pollPad(){
+ const gps=navigator.getGamepads?navigator.getGamepads():[];
+ pad.left=pad.right=false;let jumpNow=false,startNow=false;
+ for(const g of gps){
+  if(!g)continue;const ax=g.axes[0]||0,b=i=>g.buttons[i]&&g.buttons[i].pressed;
+  if(ax<-.4||b(14))pad.left=true;
+  if(ax>.4||b(15))pad.right=true;
+  if(b(0)||b(1)||b(2)||b(3)||b(12))jumpNow=true;
+  if(b(9))startNow=true;
+ }
+ const act=jumpNow||startNow;
+ if(splashStage<3){
+  if(act&&!prevAct){if(splashStage===0)showStory();else if(splashStage===1)showVideo();else endSplash();}
+  prevAct=act;pad.left=pad.right=false;return;
+ }
+ if(act&&!prevAct){if(state==='playing'){if(jumpNow)keys.jump=true;}else startGame();}
+ prevAct=act;
+}
+function frame(t){const dt=Math.min(.033,(t-lastTime)/1000||0);lastTime=t;pollPad();update(dt);draw();requestAnimationFrame(frame);}
+function setKey(e,down){
+ const k=e.key.toLowerCase();let handled=true;
+ if(k==='arrowleft'||k==='a')keys.left=down;
+ else if(k==='arrowright'||k==='d')keys.right=down;
+ else if(k==='arrowup'||k==='w'||k===' '){if(down&&!e.repeat)keys.jump=true;}
+ else handled=false;
+ if(handled)e.preventDefault();
+}
+window.addEventListener('keydown',e=>{
+ if(splashStage===0){
+  if(['Shift','Control','Alt','Meta','Tab'].includes(e.key))return;
+  e.preventDefault();showStory();return;
+ }
+ if(splashStage===1){
+  if(e.key==='Enter'||e.key==='Escape'){e.preventDefault();showVideo();}
+  return;
+ }
+ if(splashStage===2){
+  if(e.key==='Enter'||e.key==='Escape'){e.preventDefault();endSplash();}
+  return;
+ }
+ setKey(e,true);
+},{passive:false});
+window.addEventListener('keyup',e=>{if(splashStage===3)setKey(e,false);},{passive:false});
+window.addEventListener('blur',()=>{keys.left=keys.right=keys.jump=false;});
+document.querySelectorAll('[data-control]').forEach(btn=>{
+ const name=btn.dataset.control;
+ const down=e=>{e.preventDefault();btn.classList.add('active');if(name==='jump')keys.jump=true;else keys[name]=true;try{btn.setPointerCapture(e.pointerId)}catch(_){}};
+ const up=e=>{e.preventDefault();btn.classList.remove('active');if(name!=='jump')keys[name]=false;};
+ btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',up);btn.addEventListener('pointercancel',up);btn.addEventListener('lostpointercapture',up);
+});
+buildLevel(0);showOverlay('menu');requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

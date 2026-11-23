@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Bartender Rush — Mack Magic</title>
+<style>
+  :root{
+    --bg:#0B0B14;
+    --surface:#15151F;
+    --surface-2:#1C1C2A;
+    --line:#2A2A3C;
+    --cream:#F5F0E8;
+    --cream-dim:#A8A4B0;
+    --cherry:#FF3D5E;
+    --mint:#2DE6A8;
+    --gold:#FFC857;
+    --gold-dim:#8a6c2e;
+    font-size:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+    background:var(--bg); color:var(--cream);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    touch-action:manipulation;
+  }
+  body{
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(255,61,94,0.08), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(45,230,168,0.07), transparent 45%);
+  }
+  .display{ font-family:'Archivo Black','Arial Black',sans-serif; letter-spacing:-0.01em; }
+  .mono{ font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace; }
+
+  #app{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    max-width:480px; margin:0 auto;
+    background:var(--bg);
+    box-shadow:0 0 60px rgba(0,0,0,0.6);
+  }
+
+  /* ============ SCREENS ============ */
+  .screen{ position:absolute; inset:0; display:flex; flex-direction:column; }
+  .screen.hidden{ display:none; }
+
+  /* ============ START SCREEN ============ */
+  #start-screen{
+    align-items:center; justify-content:center; text-align:center;
+    padding:32px 24px; gap:18px;
+    background:
+      radial-gradient(circle at 50% 20%, rgba(255,200,87,0.10), transparent 55%),
+      var(--bg);
+  }
+  .glass-icon{ font-size:64px; line-height:1; filter:drop-shadow(0 0 24px rgba(255,200,87,0.35)); }
+  #start-screen h1{
+    font-size:2.1rem; margin:0; line-height:1.05;
+    text-transform:uppercase;
+  }
+  #start-screen h1 span{ color:var(--mint); }
+  .start-sub{
+    color:var(--cream-dim); font-size:0.95rem; max-width:320px; margin:0;
+    line-height:1.5;
+  }
+  .rule-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; width:100%; max-width:320px; text-align:left;
+    display:flex; flex-direction:column; gap:8px; font-size:0.82rem; color:var(--cream-dim);
+  }
+  .rule-card b{ color:var(--cream); }
+  .rule-row{ display:flex; gap:10px; align-items:flex-start; }
+  .rule-row .ico{ font-size:1.05rem; flex-shrink:0; width:22px; text-align:center;}
+  .btn{
+    font-family:'Archivo Black','Arial Black',sans-serif;
+    border:none; cursor:pointer; border-radius:999px;
+    text-transform:uppercase; letter-spacing:0.02em;
+    transition:transform 0.08s ease;
+  }
+  .btn:active{ transform:scale(0.96); }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--mint),#1fbf8a);
+    color:#06281d; font-size:1.05rem; padding:16px 40px;
+    box-shadow:0 8px 24px rgba(45,230,168,0.3);
+  }
+  .high-score-pill{
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface-2); border:1px solid var(--line);
+    padding:8px 16px; border-radius:999px; font-size:0.8rem; color:var(--gold);
+  }
+  .start-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; }
+  .btn-link{
+    background:transparent; border:1px solid var(--line); color:var(--cream-dim);
+    font-size:0.72rem; padding:8px 16px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:0.04em;
+  }
+
+  /* ============ RADIO WIDGET ============ */
+  #radio-widget{
+    position:absolute; top:10px; right:10px; z-index:7;
+    display:flex; align-items:center; gap:6px;
+    background:rgba(21,21,31,0.92); border:1px solid var(--line);
+    border-radius:999px; padding:6px 6px 6px 12px;
+    backdrop-filter:blur(6px);
+  }
+  #radio-widget .rw-label{ font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--cream-dim); display:flex; align-items:center; gap:5px; }
+  #radio-widget .rw-dot{ width:6px; height:6px; border-radius:50%; background:var(--cherry); box-shadow:0 0 6px var(--cherry); animation:dot-pulse 1.4s ease-in-out infinite; }
+  @keyframes dot-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.35; } }
+  #radio-toggle{
+    width:26px; height:26px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--surface-2); color:var(--cream); font-size:0.85rem;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  #radio-frame-wrap{
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    opacity:0; pointer-events:none; top:54px; right:10px;
+    z-index:8; border-radius:14px; transition:width 0.2s ease, height 0.2s ease, opacity 0.15s ease;
+    background:var(--surface); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
+  #radio-frame-wrap.open{
+    width:240px; height:170px; opacity:1; pointer-events:auto;
+  }
+  #radio-frame-wrap iframe{ width:240px; height:170px; border:0; display:block; border-radius:14px; }
+
+  /* ============ GAME HUD ============ */
+  #game-screen{ flex-direction:column; }
+  #hud{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px 10px; gap:10px; flex-shrink:0;
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+  }
+  .hud-stat{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
+  .hud-stat.center{ align-items:center; }
+  .hud-stat.right{ align-items:flex-end; }
+  .hud-label{ font-size:0.6rem; color:var(--cream-dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px;}
+  .hud-value{ font-size:1.3rem; font-family:'Archivo Black','Arial Black',sans-serif; }
+  #score-val{ color:var(--gold); }
+  #streak-val{ color:var(--mint); display:flex; align-items:center; gap:4px;}
+  #lives{ display:flex; gap:4px; font-size:1.1rem; }
+  .life-icon{ filter:drop-shadow(0 0 4px rgba(255,61,94,0.5)); }
+  .life-icon.lost{ opacity:0.18; filter:none; }
+
+  /* queue strip */
+  #queue-strip{
+    display:flex; gap:8px; padding:10px 14px; overflow-x:auto;
+    flex-shrink:0; border-bottom:1px solid var(--line);
+    background:var(--surface-2);
+  }
+  #queue-strip::-webkit-scrollbar{ display:none; }
+  .queue-chip{
+    flex-shrink:0; width:46px; height:46px; border-radius:10px;
+    background:var(--surface); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; position:relative; opacity:0.55;
+  }
+  .queue-chip.active{
+    opacity:1; border-color:var(--gold);
+    box-shadow:0 0 0 2px rgba(255,200,87,0.25);
+  }
+
+  /* main stage */
+  #stage{
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:flex-start;
+    padding:14px 16px 8px; overflow:hidden; min-height:0;
+    position:relative;
+  }
+
+  /* receipt ticket */
+  #ticket{
+    background:#FBF8F2; color:#1a1a1a;
+    width:100%; max-width:300px;
+    border-radius:4px;
+    padding:16px 18px 18px;
+    position:relative;
+    box-shadow:0 10px 30px rgba(0,0,0,0.45);
+    flex-shrink:0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.035) 28px);
+  }
+  #ticket::before, #ticket::after{
+    content:""; position:absolute; left:0; right:0; height:8px;
+    background-image: radial-gradient(circle, var(--bg) 4px, transparent 4.5px);
+    background-size: 16px 16px; background-position: -4px 0;
+  }
+  #ticket::before{ top:-4px; }
+  #ticket::after{ bottom:-4px; transform:rotate(180deg); }
+
+  .ticket-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    border-bottom:1px dashed #999; padding-bottom:8px; margin-bottom:10px;
+  }
+  .ticket-head .tk-name{ font-family:'Archivo Black','Arial Black',sans-serif; font-size:1.05rem; text-transform:uppercase;}
+  .ticket-head .tk-num{ font-size:0.75rem; color:#777; }
+  .ticket-order-label{ font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; color:#888; margin-bottom:6px;}
+  .ticket-drink{ font-family:'Archivo Black','Arial Black',sans-serif; font-size:1.25rem; margin:0 0 12px; text-transform:uppercase; }
+
+  .recipe-row{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:4px; }
+  .recipe-step{
+    font-size:0.78rem; padding:4px 9px; border-radius:5px;
+    background:#eee; border:1px solid #ddd; color:#444;
+    display:flex; align-items:center; gap:5px;
+  }
+  .recipe-step .num{ font-weight:700; color:#999; font-size:0.68rem; }
+  .recipe-step.done{ background:#1f3d2f; color:#bdf5d6; border-color:#1f3d2f; }
+  .recipe-step.done .num{ color:#6fe0a0; }
+  .recipe-step.next{ background:#fff3d6; border-color:var(--gold); color:#7a5c10; animation:pulse-next 1s ease-in-out infinite; }
+  @keyframes pulse-next{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.05);} }
+
+  /* patience bar (melting ice) */
+  .patience-wrap{ width:100%; max-width:300px; margin-top:10px; flex-shrink:0; }
+  .patience-label{ display:flex; justify-content:space-between; font-size:0.62rem; color:var(--cream-dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px; }
+  .patience-track{
+    height:10px; border-radius:999px; background:var(--surface-2);
+    border:1px solid var(--line); overflow:hidden;
+  }
+  .patience-fill{
+    height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--mint), #7fe8c9);
+    width:100%; transition:width 0.1s linear, background 0.3s ease;
+  }
+  .patience-fill.warn{ background:linear-gradient(90deg, var(--gold), #ffdb8a); }
+  .patience-fill.danger{ background:linear-gradient(90deg, var(--cherry), #ff7a8e); }
+
+  /* feedback toast */
+  #feedback{
+    position:absolute; top:46%; left:50%; transform:translate(-50%,-50%) scale(0.8);
+    font-family:'Archivo Black','Arial Black',sans-serif;
+    font-size:1.6rem; padding:10px 22px; border-radius:10px;
+    opacity:0; pointer-events:none; text-transform:uppercase;
+    z-index:5; white-space:nowrap;
+  }
+  #feedback.show{ animation:feedback-pop 0.55s ease forwards; }
+  @keyframes feedback-pop{
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.7); }
+    20%{ opacity:1; transform:translate(-50%,-50%) scale(1.08); }
+    35%{ transform:translate(-50%,-50%) scale(1); }
+    80%{ opacity:1; }
+    100%{ opacity:0; transform:translate(-50%,-65%) scale(1); }
+  }
+  #feedback.good{ background:rgba(45,230,168,0.15); color:var(--mint); border:1px solid var(--mint); }
+  #feedback.bad{ background:rgba(255,61,94,0.15); color:var(--cherry); border:1px solid var(--cherry); }
+
+  /* ingredient rail */
+  #rail{
+    flex-shrink:0; padding:10px 12px calc(14px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line); background:var(--surface);
+  }
+  #rail-label{ font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--cream-dim); margin-bottom:8px; padding-left:2px;}
+  #ingredient-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
+  }
+  .ingredient-btn{
+    aspect-ratio:1; border-radius:14px;
+    background:var(--surface-2); border:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; cursor:pointer; user-select:none;
+    transition:transform 0.07s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .ingredient-btn:active{ transform:scale(0.92); }
+  .ingredient-btn .ico{ font-size:1.5rem; }
+  .ingredient-btn .name{ font-size:0.58rem; text-transform:uppercase; color:var(--cream-dim); letter-spacing:0.02em; }
+  .ingredient-btn.flash-good{ border-color:var(--mint); background:rgba(45,230,168,0.12); }
+  .ingredient-btn.flash-bad{ border-color:var(--cherry); background:rgba(255,61,94,0.12); animation:shake 0.3s ease; }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-4px); }
+    75%{ transform:translateX(4px); }
+  }
+
+  /* combo banner */
+  #combo-banner{
+    position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    background:var(--gold); color:#241a00; font-family:'Archivo Black','Arial Black',sans-serif;
+    font-size:0.78rem; padding:5px 14px; border-radius:999px;
+    opacity:0; transition:opacity 0.2s ease, transform 0.2s ease;
+    z-index:6; white-space:nowrap; box-shadow:0 4px 14px rgba(255,200,87,0.4);
+  }
+  #combo-banner.show{ opacity:1; transform:translateX(-50%) translateY(4px); }
+
+  /* ============ GAME OVER / FUNNEL ============ */
+  #over-screen{ overflow-y:auto; padding-bottom:24px; }
+  #over-inner{ padding:28px 24px 10px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;}
+  .over-eyebrow{ font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--cherry); }
+  #over-title{ font-size:1.8rem; margin:6px 0 2px; text-transform:uppercase; }
+  #over-copy{ color:var(--cream-dim); font-size:0.92rem; max-width:320px; line-height:1.5; margin:6px 0 18px; }
+
+  .stat-row{ display:flex; gap:10px; width:100%; max-width:340px; margin-bottom:8px; }
+  .stat-box{
+    flex:1; background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:14px 8px; display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  .stat-box .v{ font-size:1.5rem; font-family:'Archivo Black','Arial Black',sans-serif; }
+  .stat-box .l{ font-size:0.6rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--cream-dim); }
+  .stat-box.gold .v{ color:var(--gold); }
+  .stat-box.mint .v{ color:var(--mint); }
+  .stat-box.new-high{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+
+  .funnel-card{
+    width:100%; max-width:340px; margin-top:14px;
+    background:linear-gradient(155deg, var(--surface), var(--surface-2));
+    border:1px solid var(--line); border-radius:18px; padding:20px;
+  }
+  .funnel-card h3{ margin:0 0 4px; font-size:1.15rem; text-transform:uppercase; }
+  .funnel-card .funnel-sub{ font-size:0.82rem; color:var(--cream-dim); margin:0 0 16px; line-height:1.45; }
+
+  .field{ margin-bottom:12px; text-align:left; }
+  .field label{ display:block; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--cream-dim); margin-bottom:5px; }
+  .field input, .field select{
+    width:100%; padding:11px 12px; border-radius:9px;
+    background:var(--bg); border:1px solid var(--line); color:var(--cream);
+    font-size:0.92rem; font-family:inherit;
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--mint); }
+  .field select{ appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A8A4B0'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center;
+  }
+
+  .btn-funnel{
+    width:100%; background:linear-gradient(135deg, var(--gold), #e0a83f);
+    color:#241a00; font-size:0.98rem; padding:15px; margin-top:6px;
+    box-shadow:0 8px 22px rgba(255,200,87,0.28);
+  }
+  .funnel-fineprint{ font-size:0.65rem; color:var(--cream-dim); margin-top:10px; opacity:0.7; }
+
+  .btn-ghost{
+    background:transparent; border:1px solid var(--line); color:var(--cream-dim);
+    font-size:0.8rem; padding:12px 28px; margin-top:16px;
+  }
+
+  /* ============ LEADERBOARD ============ */
+  #leaderboard-screen{ overflow-y:auto; padding-bottom:24px; }
+  #lb-inner{ padding:24px 20px 10px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+  #lb-inner h1{ font-size:1.6rem; margin:0; text-transform:uppercase; }
+  .lb-sub{ color:var(--cream-dim); font-size:0.82rem; margin:0; text-align:center; }
+  #lb-list{
+    width:100%; max-width:340px; display:flex; flex-direction:column; gap:7px;
+  }
+  .lb-row{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface); border:1px solid var(--line); border-radius:11px;
+    padding:10px 12px;
+  }
+  .lb-row.me{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+  .lb-rank{
+    font-family:'Archivo Black','Arial Black',sans-serif; font-size:0.95rem;
+    width:26px; text-align:center; color:var(--cream-dim); flex-shrink:0;
+  }
+  .lb-row:nth-child(1) .lb-rank{ color:var(--gold); }
+  .lb-row:nth-child(2) .lb-rank{ color:#cfd4da; }
+  .lb-row:nth-child(3) .lb-rank{ color:#d99a5b; }
+  .lb-name{ flex:1; font-size:0.86rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-meta{ font-size:0.66rem; color:var(--cream-dim); }
+  .lb-score{ font-family:'Archivo Black','Arial Black',sans-serif; color:var(--gold); font-size:1rem; flex-shrink:0; }
+  .lb-empty, .lb-error{ color:var(--cream-dim); font-size:0.85rem; text-align:center; padding:24px 0; }
+  .lb-loading{ color:var(--cream-dim); font-size:0.85rem; text-align:center; padding:24px 0; }
+
+  #thanks-block{ display:none; text-align:center; padding:6px 4px 4px; }
+  #thanks-block .check{ font-size:2.4rem; margin-bottom:6px; }
+  #thanks-block h3{ margin:0 0 6px; font-size:1.1rem; }
+  #thanks-block p{ color:var(--cream-dim); font-size:0.85rem; line-height:1.5; margin:0; }
+
+  .form-error{ color:var(--cherry); font-size:0.72rem; margin-top:8px; display:none; }
+
+  ::selection{ background:var(--mint); color:#06281d; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START SCREEN -->
+  <div id="start-screen" class="screen">
+    <div class="glass-icon">🍹</div>
+    <h1>Bartender<br><span>Rush</span></h1>
+    <p class="start-sub">The rail's full and the rush is on. Tap ingredients in the right order before patience runs out.</p>
+
+    <div class="rule-card">
+      <div class="rule-row"><span class="ico">🧾</span><span><b>Read the ticket.</b> Each order lists steps in sequence — pour them in that exact order.</span></div>
+      <div class="rule-row"><span class="ico">⏳</span><span><b>Watch the bar.</b> Patience drains while they wait. Empty bar = walk-out.</span></div>
+      <div class="rule-row"><span class="ico">🔥</span><span><b>Chain streaks.</b> Consecutive correct pours multiply your tips. One miss resets it.</span></div>
+      <div class="rule-row"><span class="ico">🚪</span><span><b>Three walk-outs</b> and the bar closes for the night.</span></div>
+    </div>
+
+    <div class="high-score-pill" id="high-score-pill">🏆 Best: 0</div>
+    <div class="start-row">
+      <button class="btn btn-primary" id="start-btn">Open the Bar</button>
+    </div>
+    <button class="btn-link" id="view-leaderboard-btn">🏆 Leaderboard</button>
+  </div>
+
+  <!-- LEADERBOARD SCREEN -->
+  <div id="leaderboard-screen" class="screen hidden">
+    <div id="lb-inner">
+      <span class="over-eyebrow">Top Bartenders</span>
+      <h1 class="display">Leaderboard</h1>
+      <p class="lb-sub">Best tip totals from the rush. Updates live.</p>
+      <div id="lb-list"><div class="lb-loading">Loading scores…</div></div>
+      <button class="btn btn-ghost" id="lb-back-btn">Back</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="screen hidden">
+    <div id="radio-widget">
+      <span class="rw-label"><span class="rw-dot"></span>STV Fit</span>
+      <button id="radio-toggle" aria-label="Open STV Fit live radio player">📻</button>
+    </div>
+    <div id="radio-frame-wrap"></div>
+    <div id="hud">
+      <div class="hud-stat">
+        <span class="hud-label">Tips</span>
+        <span class="hud-value" id="score-val">0</span>
+      </div>
+      <div class="hud-stat center">
+        <span class="hud-label">Streak</span>
+        <span class="hud-value" id="streak-val">🔥0</span>
+      </div>
+      <div class="hud-stat right">
+        <span class="hud-label">Bar</span>
+        <span class="hud-value" id="lives"></span>
+      </div>
+    </div>
+
+    <div id="queue-strip"></div>
+
+    <div id="stage">
+      <div id="combo-banner"></div>
+      <div id="ticket">
+        <div class="ticket-head">
+          <span class="tk-name" id="tk-name">Guest</span>
+          <span class="tk-num mono" id="tk-num">#001</span>
+        </div>
+        <div class="ticket-order-label">Order</div>
+        <div class="ticket-drink" id="tk-drink">Mojito</div>
+        <div class="recipe-row" id="recipe-row"></div>
+      </div>
+
+      <div class="patience-wrap">
+        <div class="patience-label"><span>Patience</span><span id="patience-pct">100%</span></div>
+        <div class="patience-track"><div class="patience-fill" id="patience-fill"></div></div>
+      </div>
+
+      <div id="feedback"></div>
+    </div>
+
+    <div id="rail">
+      <div id="rail-label">Speed Rail</div>
+      <div id="ingredient-grid"></div>
+    </div>
+  </div>
+
+  <!-- GAME OVER / FUNNEL SCREEN -->
+  <div id="over-screen" class="screen hidden">
+    <div id="over-inner">
+      <span class="over-eyebrow">Last Call</span>
+      <h1 id="over-title" class="display">Bar's Closed</h1>
+      <p id="over-copy">Three walk-outs and the night's done.</p>
+
+      <div class="stat-row">
+        <div class="stat-box gold" id="final-score-box"><span class="v" id="final-score">0</span><span class="l">Total Tips</span></div>
+        <div class="stat-box mint"><span class="v" id="final-streak">0</span><span class="l">Best Streak</span></div>
+        <div class="stat-box"><span class="v" id="final-served">0</span><span class="l">Served</span></div>
+      </div>
+
+      <div class="funnel-card" id="funnel-card">
+        <h3 id="funnel-headline">You know how to throw a party.</h3>
+        <p class="funnel-sub" id="funnel-sub">Now picture this energy at your actual event — minus the patience bar. Mack Magic books real bartending for real parties.</p>
+        <p class="funnel-sub" id="funnel-flex" style="margin-top:-10px; color:var(--gold); font-weight:600;"></p>
+
+        <form id="lead-form">
+          <div class="field">
+            <label for="lead-name">Name</label>
+            <input type="text" id="lead-name" name="name" placeholder="Your name" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="lead-email">Email</label>
+            <input type="email" id="lead-email" name="email" placeholder="you@email.com" required autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="lead-event">Event type</label>
+            <select id="lead-event" name="event_type" required>
+              <option value="" disabled selected>Choose one</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Corporate">Corporate event</option>
+              <option value="Private Party">Private party</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <input type="hidden" name="game_score" id="hidden-score">
+          <input type="hidden" name="game_streak" id="hidden-streak">
+          <input type="hidden" name="score_tier" id="hidden-tier">
+          <input type="hidden" name="_subject" value="New Bartender Rush lead — Mack Magic">
+          <button type="submit" class="btn btn-funnel" id="submit-btn">Book Mack Magic</button>
+          <p class="form-error" id="form-error">Something didn't go through — check your info and try again.</p>
+        </form>
+
+        <div id="thanks-block">
+          <div class="check">🥂</div>
+          <h3>You're on the list.</h3>
+          <p>Mack Magic will reach out shortly to lock in your date.</p>
+        </div>
+
+        <p class="funnel-fineprint">No spam, just party details. Unsubscribe anytime.</p>
+      </div>
+
+      <button class="btn btn-ghost" id="retry-btn">Run It Back</button>
+      <div class="start-row" style="margin-top:8px;">
+        <button class="btn-link" id="share-score-btn">📤 Share Score</button>
+        <button class="btn-link" id="view-leaderboard-btn-2">🏆 Leaderboard</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- CONFIG ----------
+  const FORMSPREE_URL = "https://formspree.io/f/xojoaopl";
+  const STORAGE_KEY = "mackmagic_bartender_rush";
+  const MAX_LIVES = 3;
+  const QUEUE_VISIBLE = 5;
+
+  // Supabase — anon public REST, no backend code.
+  // Fill these in from Project Settings > API after running supabase-setup.sql
+  const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL"; // e.g. https://xxxxx.supabase.co
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const LEADERBOARD_TABLE = "leaderboard";
+  const LEADERBOARD_LIMIT = 10;
+
+  // Radio — STV Fit channel, embedded live player
+  const RADIO_EMBED_URL = "https://fairefaretravels.github.io/stvradiomeltdown-fit/";
+
+  const INGREDIENTS = [
+    { id:"rum",    name:"Rum",    ico:"🥃" },
+    { id:"vodka",  name:"Vodka",  ico:"🍶" },
+    { id:"tequila",name:"Tequila",ico:"🌵" },
+    { id:"whiskey",name:"Whiskey",ico:"🥃" },
+    { id:"gin",    name:"Gin",    ico:"🌿" },
+    { id:"mint",   name:"Mint",   ico:"🍃" },
+    { id:"lime",   name:"Lime",   ico:"🍈" },
+    { id:"lemon",  name:"Lemon",  ico:"🍋" },
+    { id:"soda",   name:"Soda",   ico:"🫧" },
+    { id:"cola",   name:"Cola",   ico:"🥤" },
+    { id:"sugar",  name:"Sugar",  ico:"🧂" },
+    { id:"shake",  name:"Shake",  ico:"🧊" },
+  ];
+
+  const RECIPES = [
+    { name:"Mojito",        steps:["rum","mint","lime","soda"] },
+    { name:"Margarita",     steps:["tequila","lime","sugar","shake"] },
+    { name:"Whiskey Sour",  steps:["whiskey","lemon","sugar","shake"] },
+    { name:"Rum & Coke",    steps:["rum","cola"] },
+    { name:"Gin Fizz",      steps:["gin","lemon","sugar","soda"] },
+    { name:"Vodka Soda",    steps:["vodka","soda","lime"] },
+    { name:"Tequila Sunrise",steps:["tequila","sugar","shake"] },
+    { name:"Daiquiri",      steps:["rum","lime","sugar","shake"] },
+  ];
+
+  const NAMES = ["Jordan","Casey","Priya","Diego","Sam","Avery","Leah","Marcus","Ruth","Theo","Nina","Carlos","Beau","Ivy","Dante","Mara"];
+
+  // ---------- STATE ----------
+  let queue = [];
+  let ticketCounter = 0;
+  let activeOrder = null;
+  let stepIndex = 0;
+  let score = 0;
+  let streak = 0;
+  let bestStreak = 0;
+  let served = 0;
+  let lives = MAX_LIVES;
+  let patience = 100;
+  let patienceMax = 100;
+  let drainRate = 0;
+  let tickHandle = null;
+  let spawnHandle = null;
+  let running = false;
+  let difficultyTimer = 0;
+
+  // ---------- DOM ----------
+  const $ = (id) => document.getElementById(id);
+  const startScreen = $("start-screen");
+  const gameScreen = $("game-screen");
+  const overScreen = $("over-screen");
+  const scoreVal = $("score-val");
+  const streakVal = $("streak-val");
+  const livesEl = $("lives");
+  const queueStrip = $("queue-strip");
+  const tkName = $("tk-name");
+  const tkNum = $("tk-num");
+  const tkDrink = $("tk-drink");
+  const recipeRow = $("recipe-row");
+  const patienceFill = $("patience-fill");
+  const patiencePct = $("patience-pct");
+  const ingredientGrid = $("ingredient-grid");
+  const feedback = $("feedback");
+  const comboBanner = $("combo-banner");
+  const highScorePill = $("high-score-pill");
+
+  // new elements
+  const leaderboardScreen = $("leaderboard-screen");
+  const lbList = $("lb-list");
+  const radioToggle = $("radio-toggle");
+  const radioFrameWrap = $("radio-frame-wrap");
+
+  // ---------- STORAGE ----------
+  function loadSave(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : { highScore:0, bestStreak:0, leads:[] };
+    }catch(e){ return { highScore:0, bestStreak:0, leads:[] }; }
+  }
+  function saveSave(data){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  }
+  let save = loadSave();
+  highScorePill.textContent = "🏆 Best: " + save.highScore;
+
+  // ---------- BUILD INGREDIENT RAIL ----------
+  function buildRail(){
+    ingredientGrid.innerHTML = "";
+    INGREDIENTS.forEach(ing => {
+      const btn = document.createElement("div");
+      btn.className = "ingredient-btn";
+      btn.dataset.id = ing.id;
+      btn.innerHTML = `<span class="ico">${ing.ico}</span><span class="name">${ing.name}</span>`;
+      btn.addEventListener("click", () => handleTap(ing.id, btn));
+      ingredientGrid.appendChild(btn);
+    });
+  }
+  buildRail();
+
+  // ---------- QUEUE / ORDER GENERATION ----------
+  function randomOrder(){
+    ticketCounter++;
+    const recipe = RECIPES[Math.floor(Math.random()*RECIPES.length)];
+    const name = NAMES[Math.floor(Math.random()*NAMES.length)];
+    return {
+      id: ticketCounter,
+      name,
+      recipe,
+      num: String(ticketCounter).padStart(3,"0")
+    };
+  }
+
+  function fillQueue(){
+    while(queue.length < QUEUE_VISIBLE){
+      queue.push(randomOrder());
+    }
+  }
+
+  function renderQueueStrip(){
+    queueStrip.innerHTML = "";
+    queue.slice(0, QUEUE_VISIBLE).forEach((order, i) => {
+      const chip = document.createElement("div");
+      chip.className = "queue-chip" + (i===0 ? " active" : "");
+      chip.textContent = recipeEmoji(order.recipe.name);
+      queueStrip.appendChild(chip);
+    });
+  }
+
+  function recipeEmoji(name){
+    const map = {
+      "Mojito":"🍹","Margarita":"🍸","Whiskey Sour":"🥃","Rum & Coke":"🥤",
+      "Gin Fizz":"🍋","Vodka Soda":"🫧","Tequila Sunrise":"🌅","Daiquiri":"🍓"
+    };
+    return map[name] || "🍹";
+  }
+
+  // ---------- DIFFICULTY ----------
+  function currentDrainRate(){
+    // base drain, ramps up slowly as more are served
+    const base = 11; // % per second at start
+    const ramp = Math.min(served * 0.35, 9);
+    return base + ramp;
+  }
+
+  // ---------- ORDER LIFECYCLE ----------
+  function nextOrder(){
+    fillQueue();
+    activeOrder = queue.shift();
+    stepIndex = 0;
+    patience = 100;
+    drainRate = currentDrainRate();
+    renderTicket();
+    renderQueueStrip();
+    fillQueue();
+    renderQueueStrip();
+  }
+
+  function renderTicket(){
+    tkName.textContent = activeOrder.name;
+    tkNum.textContent = "#" + activeOrder.num;
+    tkDrink.textContent = activeOrder.recipe.name;
+    recipeRow.innerHTML = "";
+    activeOrder.recipe.steps.forEach((stepId, i) => {
+      const ing = INGREDIENTS.find(x => x.id === stepId);
+      const span = document.createElement("span");
+      span.className = "recipe-step" + (i < stepIndex ? " done" : (i === stepIndex ? " next" : ""));
+      span.innerHTML = `<span class="num">${i+1}</span><span>${ing.ico} ${ing.name}</span>`;
+      recipeRow.appendChild(span);
+    });
+  }
+
+  // ---------- TAP HANDLING ----------
+  function handleTap(id, btnEl){
+    if(!running || !activeOrder) return;
+    const expected = activeOrder.recipe.steps[stepIndex];
+
+    if(id === expected){
+      btnEl.classList.add("flash-good");
+      setTimeout(()=>btnEl.classList.remove("flash-good"), 220);
+      stepIndex++;
+      renderTicket();
+
+      if(stepIndex >= activeOrder.recipe.steps.length){
+        completeOrder();
+      }
+    } else {
+      btnEl.classList.add("flash-bad");
+      setTimeout(()=>btnEl.classList.remove("flash-bad"), 300);
+      breakStreak();
+      showFeedback("Wrong Pour", false);
+    }
+  }
+
+  function breakStreak(){
+    streak = 0;
+    updateHud();
+  }
+
+  function completeOrder(){
+    served++;
+    streak++;
+    bestStreak = Math.max(bestStreak, streak);
+    const multiplier = 1 + Math.floor(streak/3)*0.5;
+    const base = 8 + activeOrder.recipe.steps.length * 3;
+    const tip = Math.round(base * multiplier);
+    score += tip;
+    updateHud();
+    showFeedback("+$" + tip + (multiplier>1 ? " ×"+multiplier.toFixed(1) : ""), true);
+    if(streak > 0 && streak % 3 === 0){
+      showCombo(streak);
+    }
+    nextOrder();
+  }
+
+  function showFeedback(text, good){
+    feedback.textContent = text;
+    feedback.className = "show " + (good ? "good" : "bad");
+    void feedback.offsetWidth;
+    feedback.classList.add("show");
+    feedback.classList.toggle("good", good);
+    feedback.classList.toggle("bad", !good);
+  }
+
+  function showCombo(n){
+    comboBanner.textContent = "🔥 " + n + " STREAK — TIPS UP!";
+    comboBanner.classList.add("show");
+    setTimeout(()=> comboBanner.classList.remove("show"), 1100);
+  }
+
+  function updateHud(){
+    scoreVal.textContent = score;
+    streakVal.textContent = "🔥" + streak;
+    renderLives();
+  }
+
+  function renderLives(){
+    livesEl.innerHTML = "";
+    for(let i=0;i<MAX_LIVES;i++){
+      const span = document.createElement("span");
+      span.className = "life-icon" + (i < (MAX_LIVES-lives) ? " lost" : "");
+      span.textContent = "🍸";
+      livesEl.appendChild(span);
+    }
+  }
+
+  // ---------- WALKOUT ----------
+  function walkOut(){
+    lives--;
+    breakStreak();
+    showFeedback(activeOrder.name + " Walked", false);
+    updateHud();
+    if(lives <= 0){
+      endGame();
+    } else {
+      nextOrder();
+    }
+  }
+
+  // ---------- GAME LOOP ----------
+  function tick(dt){
+    if(!running) return;
+    patience -= drainRate * dt;
+    if(patience <= 0){
+      patience = 0;
+      updatePatienceBar();
+      walkOut();
+      return;
+    }
+    updatePatienceBar();
+  }
+
+  function updatePatienceBar(){
+    const pct = Math.max(0, Math.round(patience));
+    patienceFill.style.width = pct + "%";
+    patiencePct.textContent = pct + "%";
+    patienceFill.classList.toggle("warn", pct <= 50 && pct > 25);
+    patienceFill.classList.toggle("danger", pct <= 25);
+  }
+
+  let lastTs = null;
+  function loop(ts){
+    if(!running) return;
+    if(lastTs === null) lastTs = ts;
+    const dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+    tick(dt);
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- START / END ----------
+  function startGame(){
+    queue = [];
+    ticketCounter = 0;
+    score = 0; streak = 0; bestStreak = 0; served = 0; lives = MAX_LIVES;
+    lastTs = null;
+    running = true;
+    updateHud();
+    fillQueue();
+    nextOrder();
+    startScreen.classList.add("hidden");
+    overScreen.classList.add("hidden");
+    leaderboardScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
+    startRadio();
+    requestAnimationFrame(loop);
+  }
+
+  function endGame(){
+    running = false;
+    const isNewHigh = score > save.highScore;
+    save.highScore = Math.max(save.highScore, score);
+    save.bestStreak = Math.max(save.bestStreak, bestStreak);
+    saveSave(save);
+    highScorePill.textContent = "🏆 Best: " + save.highScore;
+
+    $("final-score").textContent = score;
+    $("final-streak").textContent = bestStreak;
+    $("final-served").textContent = served;
+    $("final-score-box").classList.toggle("new-high", isNewHigh);
+    $("hidden-score").value = score;
+    $("hidden-streak").value = bestStreak;
+
+    // Adaptive funnel copy
+    const headline = $("funnel-headline");
+    const sub = $("funnel-sub");
+    const flexLine = $("funnel-flex");
+    const overTitle = $("over-title");
+    const overCopy = $("over-copy");
+
+    if(isNewHigh){
+      overTitle.textContent = "New House Record";
+      overCopy.textContent = "Tonight's rush is in the books — and it's your best yet.";
+    } else {
+      overTitle.textContent = "Bar's Closed";
+      overCopy.textContent = "Three walk-outs and the night's done.";
+    }
+
+    let tier;
+    if(score >= 250){
+      tier = "high";
+      headline.textContent = "You know how to throw a party.";
+      sub.textContent = "That rush speed is real bartender energy. Bring it to your next event — Mack Magic brings the bar, you bring the guest list.";
+      flexLine.textContent = bestStreak >= 9
+        ? `A ${bestStreak}-streak behind the rail? Mack Magic books people who move exactly like that.`
+        : "Scores like that move fast — so do good bartending dates. Lock yours in early.";
+    } else if(score >= 100){
+      tier = "mid";
+      headline.textContent = "Not bad behind the rail.";
+      sub.textContent = "You held the line through the rush. Imagine that same energy at your event, minus the chaos — that's what Mack Magic handles.";
+      flexLine.textContent = "Good dates fill up fast — get on the calendar before your event weekend does.";
+    } else {
+      tier = "low";
+      headline.textContent = "Let the real deal handle it.";
+      sub.textContent = "Bartending under pressure is harder than it looks. Good news: you don't have to do it yourself. Mack Magic books real bartending for real parties.";
+      flexLine.textContent = "No shame in calling in a pro — that's literally what we're here for.";
+    }
+    $("hidden-tier").value = tier;
+
+    // reset form UI in case of replay
+    $("lead-form").style.display = "";
+    $("thanks-block").style.display = "none";
+    $("form-error").style.display = "none";
+    $("lead-form").reset();
+    $("submit-btn").disabled = false;
+    $("submit-btn").textContent = "Book Mack Magic";
+
+    stopRadio();
+    gameScreen.classList.add("hidden");
+    overScreen.classList.remove("hidden");
+  }
+
+  // ---------- RADIO (STV Fit live channel) ----------
+  let radioLoaded = false;
+  let radioVisible = false;
+
+  function loadRadio(){
+    if(radioLoaded) return;
+    radioLoaded = true;
+    const iframe = document.createElement("iframe");
+    iframe.src = RADIO_EMBED_URL;
+    iframe.setAttribute("allow", "autoplay");
+    iframe.setAttribute("title", "STV Fit live radio");
+    radioFrameWrap.appendChild(iframe);
+  }
+
+  function startRadio(){
+    loadRadio();
+    setRadioVisible(false); // load it small/hidden first; player needs a tap to start audio anyway
+  }
+
+  function stopRadio(){
+    // Tear the iframe down so audio actually stops rather than playing in the background
+    radioFrameWrap.innerHTML = "";
+    radioFrameWrap.className = "";
+    radioLoaded = false;
+    radioVisible = false;
+  }
+
+  function setRadioVisible(visible){
+    radioVisible = visible;
+    radioFrameWrap.classList.toggle("open", visible);
+    radioToggle.textContent = visible ? "✕" : "📻";
+  }
+
+  // Cross-origin note: the STV Fit player lives on a different origin
+  // (GitHub Pages), so this page can't reach into its <audio> element to
+  // mute/play it directly — that's a browser security boundary, not a bug.
+  // Tapping the radio icon expands the actual station player so the listener
+  // can use its own play/volume controls. If a raw stream URL becomes
+  // available later, swap this for a same-origin <audio> tag for true
+  // programmatic autoplay/volume control.
+  radioToggle.addEventListener("click", () => {
+    loadRadio();
+    setRadioVisible(!radioVisible);
+  });
+
+  // ---------- LEADERBOARD (Supabase anon REST) ----------
+  function supabaseConfigured(){
+    return SUPABASE_URL && !SUPABASE_URL.startsWith("YOUR_") &&
+           SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith("YOUR_");
+  }
+
+  async function submitToLeaderboard(playerNameInput){
+    if(!supabaseConfigured()) return; // not set up yet — skip quietly
+    const playerName = (playerNameInput || "Anonymous").slice(0, 24);
+    const row = {
+      player_name: playerName,
+      score: score,
+      best_streak: bestStreak,
+      served: served
+    };
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${LEADERBOARD_TABLE}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify(row)
+    });
+    if(!res.ok){
+      throw new Error("Leaderboard submit failed: " + res.status);
+    }
+  }
+
+  async function fetchLeaderboard(){
+    if(!supabaseConfigured()){
+      lbList.innerHTML = `<div class="lb-error">Leaderboard isn't connected yet. Add your Supabase URL and anon key in the game's config to turn this on.</div>`;
+      return;
+    }
+    lbList.innerHTML = `<div class="lb-loading">Loading scores…</div>`;
+    try{
+      const url = `${SUPABASE_URL}/rest/v1/${LEADERBOARD_TABLE}?select=player_name,score,best_streak,served&order=score.desc&limit=${LEADERBOARD_LIMIT}`;
+      const res = await fetch(url, {
+        headers:{
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if(!res.ok) throw new Error("Status " + res.status);
+      const rows = await res.json();
+      renderLeaderboard(rows);
+    } catch(err){
+      lbList.innerHTML = `<div class="lb-error">Couldn't load the leaderboard right now. Try again in a bit.</div>`;
+    }
+  }
+
+  function renderLeaderboard(rows){
+    if(!rows || rows.length === 0){
+      lbList.innerHTML = `<div class="lb-empty">No scores yet — be the first behind the rail.</div>`;
+      return;
+    }
+    lbList.innerHTML = "";
+    rows.forEach((row, i) => {
+      const div = document.createElement("div");
+      div.className = "lb-row";
+      div.innerHTML = `
+        <span class="lb-rank">${i+1}</span>
+        <span class="lb-name">${escapeHtml(row.player_name || "Anonymous")}</span>
+        <span class="lb-meta">🔥${row.best_streak ?? 0}</span>
+        <span class="lb-score">${row.score}</span>
+      `;
+      lbList.appendChild(div);
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function showLeaderboard(){
+    startScreen.classList.add("hidden");
+    gameScreen.classList.add("hidden");
+    overScreen.classList.add("hidden");
+    leaderboardScreen.classList.remove("hidden");
+    fetchLeaderboard();
+  }
+
+  $("view-leaderboard-btn").addEventListener("click", showLeaderboard);
+  $("view-leaderboard-btn-2").addEventListener("click", showLeaderboard);
+  $("lb-back-btn").addEventListener("click", () => {
+    leaderboardScreen.classList.add("hidden");
+    startScreen.classList.remove("hidden");
+  });
+
+  // ---------- SHARE ----------
+  $("share-score-btn").addEventListener("click", () => {
+    const text = `I hit ${score} tips at Mack Magic Rush 🍸 — ${bestStreak}🔥 streak. Think you can beat it?`;
+    if(navigator.share){
+      navigator.share({ text, url: location.href }).catch(()=>{});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(text + " " + location.href).then(()=>{
+        showFeedback("Copied!", true);
+      }).catch(()=>{
+        showFeedback("Couldn't Copy", false);
+      });
+    }
+  });
+
+  $("lead-form").addEventListener("submit", async function(e){
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = $("submit-btn");
+    const errorEl = $("form-error");
+    errorEl.style.display = "none";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending…";
+
+    const leadData = {
+      name: $("lead-name").value.trim(),
+      email: $("lead-email").value.trim(),
+      event_type: $("lead-event").value,
+      game_score: score,
+      game_streak: bestStreak,
+      timestamp: new Date().toISOString()
+    };
+
+    // Always save locally first so the lead is never lost
+    save.leads = save.leads || [];
+    save.leads.push(leadData);
+    save.lastName = leadData.name;
+    saveSave(save);
+
+    // Leaderboard submit is best-effort and never blocks the booking funnel
+    submitToLeaderboard(leadData.name || "Anonymous").catch(()=>{});
+
+    try{
+      const res = await fetch(FORMSPREE_URL, {
+        method: "POST",
+        headers: { "Accept": "application/json" },
+        body: new FormData(form)
+      });
+
+      if(res.ok){
+        form.style.display = "none";
+        $("thanks-block").style.display = "block";
+      } else {
+        throw new Error("Formspree responded with " + res.status);
+      }
+    } catch(err){
+      errorEl.textContent = "Saved locally — connection hiccup sending it through. We'll have your info either way, or try again.";
+      errorEl.style.display = "block";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Book Mack Magic";
+    }
+  });
+
+  // ---------- BUTTONS ----------
+  $("start-btn").addEventListener("click", startGame);
+  $("retry-btn").addEventListener("click", startGame);
+
+})();
+</script>
+</body>
+</html>

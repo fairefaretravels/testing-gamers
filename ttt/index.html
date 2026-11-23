@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0620">
+
+<title>Neon Faces Tic-Tac-Toe | Free Online Game</title>
+
+<meta name="description" content="Play Neon Faces Tic-Tac-Toe, a fun neon-inspired browser game featuring glowing visuals, face-themed game pieces, and classic X and O strategy. Challenge a friend and see who wins!">
+
+<meta name="keywords" content="Neon Faces Tic-Tac-Toe, tic tac toe online, free tic tac toe game, neon games, two player browser games, X and O game, online puzzle games, arcade games">
+
+<meta name="author" content="Saneca Mack">
+<meta name="robots" content="index, follow, max-image-preview:large">
+
+<!-- SEO image -->
+<meta name="image" content="ttt.PNG">
+
+<!-- Open Graph: Facebook, Messenger, Discord -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Neon Faces Tic-Tac-Toe | Free Online Game">
+<meta property="og:description" content="Put your strategy to the test in Neon Faces Tic-Tac-Toe. Play the classic X and O game with a vibrant neon look and face-themed game pieces.">
+<meta property="og:image" content="ttt.PNG">
+<meta property="og:image:alt" content="Neon Faces Tic-Tac-Toe game with glowing neon graphics">
+<meta property="og:image:type" content="image/png">
+<meta property="og:site_name" content="Neon Faces Tic-Tac-Toe">
+
+<!-- X / Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Neon Faces Tic-Tac-Toe">
+<meta name="twitter:description" content="Play Tic-Tac-Toe online in a vibrant neon arcade style. Challenge a friend and claim the win!">
+<meta name="twitter:image" content="ttt.PNG">
+<meta name="twitter:image:alt" content="Neon Faces Tic-Tac-Toe browser game preview">
+
+<!-- Browser icon -->
+<link rel="icon" type="image/png" href="ttt.PNG">
+
+</head>
+
+<style>
+:root{--bg:#05070a;--green:#39ff14;--yellow:#fff200;--text:#d9ffe0;--dim:#6b8a70;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 30%,#0b1a10 0%,var(--bg) 70%);color:var(--text);
+font-family:"Trebuchet MS",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+h1{margin:0;font-size:clamp(1.4rem,5vw,2rem);letter-spacing:.2em;text-transform:uppercase;color:var(--green);
+text-shadow:0 0 6px var(--green),0 0 18px var(--green),0 0 36px var(--green)}
+.score{display:flex;gap:20px;font-size:1rem;letter-spacing:.1em}
+.score b{font-size:1.4rem}
+.g{color:var(--green);text-shadow:0 0 8px var(--green)}
+.y{color:var(--yellow);text-shadow:0 0 8px var(--yellow)}
+#status{height:1.6em;font-size:1.1rem;letter-spacing:.12em}
+svg{width:min(88vw,420px);height:auto;overflow:visible;touch-action:manipulation}
+.line{stroke:var(--green);stroke-width:4;stroke-linecap:round;fill:none;stroke-dasharray:1;stroke-dashoffset:1;
+filter:drop-shadow(0 0 4px var(--green)) drop-shadow(0 0 10px var(--green));animation:draw .7s ease forwards}
+.line:nth-of-type(2){animation-delay:.15s}.line:nth-of-type(3){animation-delay:.3s}.line:nth-of-type(4){animation-delay:.45s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.face path,.face circle{fill:none;stroke-width:4;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .55s ease forwards}
+.face path:nth-child(2),.face circle:nth-child(2){animation-delay:.15s}
+.face path:nth-child(3),.face circle:nth-child(3){animation-delay:.3s}
+.face path:nth-child(4){animation-delay:.4s}
+.face.gr{stroke:var(--green);filter:drop-shadow(0 0 3px var(--green)) drop-shadow(0 0 9px var(--green))}
+.face.ye{stroke:var(--yellow);filter:drop-shadow(0 0 3px var(--yellow)) drop-shadow(0 0 9px var(--yellow))}
+.face.win{animation:pulse .9s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.55}to{opacity:1}}
+.cell{fill:transparent;cursor:pointer}
+.cell:hover{fill:rgba(57,255,20,.06)}
+.cell:focus-visible{outline:none;fill:rgba(255,242,0,.12)}
+.wline{stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s .3s ease forwards;
+filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px var(--yellow))}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;letter-spacing:.1em;text-transform:uppercase;font-size:.85rem;padding:9px 16px;border-radius:999px;cursor:pointer;
+background:transparent;color:var(--yellow);border:2px solid var(--yellow);box-shadow:0 0 8px var(--yellow),inset 0 0 8px rgba(255,242,0,.25)}
+button:hover,button[aria-pressed="true"]{background:rgba(255,242,0,.15)}
+button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important}}
+</style>
+</head>
+<body>
+<h1>Neon Faces</h1>
+<div class="score"><span class="g">😊 <b id="sg">0</b></span><span>draws <b id="sd">0</b></span><span class="y">😜 <b id="sy">0</b></span></div>
+<div id="status" role="status" aria-live="polite"></div>
+<svg id="board" viewBox="0 0 300 300" role="grid" aria-label="Tic-tac-toe board"></svg>
+<div class="row">
+<button id="new">New round</button>
+<button id="cpu" aria-pressed="false">vs Computer: off</button>
+</div>
+<script>
+(function(){
+var NS="http://www.w3.org/2000/svg",svg=document.getElementById("board"),st=document.getElementById("status");
+var W=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+var b,turn,over,cpu=false,start=0,sc={g:0,y:0,d:0};
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e}
+function ctr(i){return[(i%3)*100+50,Math.floor(i/3)*100+50]}
+function face(i,who){
+var c=ctr(i),x=c[0],y=c[1],g=el("g",{class:"face "+(who?"ye":"gr"),transform:"translate("+x+","+y+")"});
+g.dataset.i=i;
+if(!who){ // happy smile
+el("circle",{cx:0,cy:0,r:32,pathLength:1},g);
+el("path",{d:"M-12 -9 v4",pathLength:1},g);
+el("path",{d:"M12 -9 v4",pathLength:1},g);
+el("path",{d:"M-16 6 Q0 24 16 6",pathLength:1},g);
+}else{ // wink + tongue
+el("circle",{cx:0,cy:0,r:32,pathLength:1},g);
+el("path",{d:"M-16 -7 Q-12 -13 -8 -7",pathLength:1},g);
+el("path",{d:"M10 -9 v5",pathLength:1},g);
+el("path",{d:"M-16 6 Q0 20 16 6 M2 14 v8 q4 4 8 0 v-10",pathLength:1},g);
+}
+}
+function build(){
+svg.innerHTML="";
+[["M100 14 V286"],["M200 14 V286"],["M14 100 H286"],["M14 200 H286"]].forEach(function(d){el("path",{d:d[0],class:"line",pathLength:1})});
+for(var i=0;i<9;i++)(function(i){
+var r=el("rect",{x:(i%3)*100+4,y:Math.floor(i/3)*100+4,width:92,height:92,rx:10,class:"cell",tabindex:0,role:"gridcell","aria-label":"Cell "+(i+1)});
+r.addEventListener("click",function(){play(i)});
+r.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();play(i)}});
+})(i);
+}
+function say(h,cls){st.innerHTML=h;st.className=cls||""}
+function winner(bd){for(var k=0;k<8;k++){var w=W[k];if(bd[w[0]]!==null&&bd[w[0]]===bd[w[1]]&&bd[w[1]]===bd[w[2]])return w}return null}
+function reset(){b=Array(9).fill(null);over=false;start^=1;turn=start;build();
+say(turn?"<span class='y'>😜 your move</span>":"<span class='g'>😊 your move</span>");
+if(cpu&&turn===1)setTimeout(ai,500)}
+function play(i){
+if(over||b[i]!==null||(cpu&&turn===1&&arguments.length&&!play.ai))return;
+b[i]=turn;face(i,turn);
+var w=winner(b);
+if(w){over=true;var k=turn?"y":"g";sc[k]++;upd();
+var a=ctr(w[0]),z=ctr(w[2]);
+el("path",{d:"M"+a[0]+" "+a[1]+" L"+z[0]+" "+z[1],class:"wline",pathLength:1});
+w.forEach(function(j){var f=svg.querySelector('.face[data-i="'+j+'"]');if(f)f.classList.add("win")});
+say(turn?"<span class='y'>😜 yellow wins!</span>":"<span class='g'>😊 green wins!</span>");return}
+if(b.every(function(v){return v!==null})){over=true;sc.d++;upd();say("🤝 it's a draw");return}
+turn^=1;
+say(turn?"<span class='y'>😜 your move</span>":"<span class='g'>😊 your move</span>");
+if(cpu&&turn===1)setTimeout(ai,550)}
+function mm(bd,t){var w=winner(bd);if(w)return bd[w[0]]===1?1:-1;
+var e=[];bd.forEach(function(v,i){if(v===null)e.push(i)});if(!e.length)return 0;
+var best=t?-2:2;e.forEach(function(i){bd[i]=t;var s=mm(bd,t^1);bd[i]=null;best=t?Math.max(best,s):Math.min(best,s)});return best}
+function ai(){if(over)return;var m=[],best=-2;
+b.forEach(function(v,i){if(v===null){b[i]=1;var s=mm(b,0);b[i]=null;if(s>best){best=s;m=[i]}else if(s===best)m.push(i)}});
+// a little randomness among equal moves keeps it playful
+play.ai=true;play(m[Math.floor(Math.random()*m.length)]);play.ai=false}
+function upd(){document.getElementById("sg").textContent=sc.g;document.getElementById("sy").textContent=sc.y;document.getElementById("sd").textContent=sc.d}
+document.getElementById("new").onclick=reset;
+document.getElementById("cpu").onclick=function(){cpu=!cpu;this.setAttribute("aria-pressed",cpu);this.textContent="vs Computer: "+(cpu?"on":"off");sc={g:0,y:0,d:0};upd();start=1;reset()};
+start=1;reset();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GET HOME! — Two Player Board Game</title>
+<style>
+:root{--ink:#17243a;--cream:#fff9ec;--blue:#2463eb;--pink:#f05b87;--green:#24a66a;--red:#e34b4b;--gold:#f4bd45}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#e9f3ff,#fff4e6);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);min-height:100vh}
+header{text-align:center;padding:18px 12px 10px}h1{margin:0;font-size:clamp(28px,6vw,44px);letter-spacing:2px;font-weight:950}header p{margin:5px 0 0;color:#52627a;font-weight:600}
+main{max-width:1100px;margin:auto;padding:10px 14px 28px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+.panel{background:#ffffffd9;border:2px solid #d7e4f3;border-radius:20px;padding:14px;box-shadow:0 8px 24px #1b376015}
+.board-wrap{position:relative}.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;touch-action:manipulation}
+.space{aspect-ratio:1/1;min-width:0;border:2px solid #d5dfec;border-radius:12px;background:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;font-size:clamp(9px,1.4vw,13px);font-weight:800;color:#52627a;cursor:pointer;transition:.15s;padding:2px}
+.space .num{position:absolute;top:3px;left:5px;font-size:9px;color:#8492a6}.space .emoji{font-size:clamp(15px,2.8vw,25px);line-height:1.1}.space .kind{font-size:clamp(7px,1vw,10px);text-align:center}
+.space.current-target{border-color:#ffc43d;box-shadow:0 0 0 3px #ffc43d88;background:#fff7d9;transform:scale(1.025)}
+.space.card-space{background:#f1eaff;border-color:#c6a8f5}.space.trouble{background:#fff0ef;border-color:#f5b2ad}.space.bonus{background:#e9fff3;border-color:#9bdfb8}.space.home{background:#fff2c8;border-color:#edc45a}
+.tokens{display:flex;gap:2px;position:absolute;bottom:4px;right:4px}.token{width:17px;height:17px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px #0004}.p1{background:var(--blue)}.p2{background:var(--pink)}
+.side{display:flex;flex-direction:column;gap:12px}.players{display:grid;grid-template-columns:1fr 1fr;gap:8px}.player{padding:10px;border-radius:14px;background:#f3f7ff;border:2px solid transparent}.player.active{border-color:var(--gold);background:#fff9e5}.player strong{display:block}.player small{color:#617087}
+.dice-area{text-align:center}.dice{width:86px;height:86px;border-radius:18px;background:white;border:3px solid #d5dfec;margin:10px auto;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;box-shadow:0 5px 0 #d5dfec}
+.dice.red{background:#fff0ef;border-color:#f3a6a1;color:var(--red)}.dice.green{background:#eafff2;border-color:#9bdfb8;color:var(--green)}
+button{border:0;border-radius:12px;padding:12px 16px;font-weight:850;font-size:15px;cursor:pointer;background:var(--blue);color:white;box-shadow:0 4px 0 #1746b4}button:disabled{opacity:.45;cursor:not-allowed}button.secondary{background:#e8eef7;color:#23344d;box-shadow:0 4px 0 #c9d4e3}button.full{width:100%}
+.hint{font-size:13px;line-height:1.45;color:#52627a;margin:8px 0 0}.status{font-weight:800;min-height:44px;line-height:1.35}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#5d6b7e;margin-top:10px}.legend span{display:flex;align-items:center;gap:4px}
+.card{background:linear-gradient(135deg,#fff7df,#fff);border:2px dashed #e7bd57;border-radius:16px;padding:14px;min-height:112px}.card h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#8b6611}.card p{margin:0;font-size:16px;font-weight:800;line-height:1.35}
+.rules{font-size:12px;line-height:1.5;color:#5b6980}.rules b{color:#26364e}
+.overlay{position:fixed;inset:0;background:#14203399;display:none;align-items:center;justify-content:center;padding:20px;z-index:5}.overlay.show{display:flex}.modal{background:white;border-radius:22px;padding:24px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px #0004}.modal h2{margin:0 0 8px}.modal p{line-height:1.5}.modal button{margin-top:10px}
+@media(max-width:760px){main{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side .wide{grid-column:1/-1}.board{gap:4px}.space{border-radius:8px}.panel{padding:10px}}
+@media(max-width:390px){main{padding:8px}.side{grid-template-columns:1fr}.side .wide{grid-column:auto}.board{gap:3px}}
+</style>
+</head>
+<body>
+<header><h1>GET HOME!</h1><p>A two-player race through real-life twists, turns & lucky breaks.</p></header>
+<main>
+<section class="panel board-wrap">
+  <div class="board" id="board" aria-label="Game board"></div>
+  <div class="legend"><span>🔵 Player 1</span><span>🩷 Player 2</span><span>🟣 Card</span><span>🔴 Setback</span><span>🟢 Good luck</span><span>🏠 Home</span></div>
+</section>
+<aside class="side">
+  <section class="panel wide">
+    <div class="players">
+      <div class="player active" id="player1"><strong>🔵 PLAYER 1</strong><small>Start: 0 / 40</small></div>
+      <div class="player" id="player2"><strong>🩷 PLAYER 2</strong><small>Start: 0 / 40</small></div>
+    </div>
+    <div class="dice-area">
+      <div class="dice" id="dice">?</div>
+      <div class="status" id="status">Player 1, roll the dice to begin!</div>
+      <button class="full" id="rollBtn">ROLL THE DICE</button>
+      <p class="hint" id="moveHint">After rolling, tap one of the glowing spaces to move your piece.</p>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="card" id="card"><h3>Chance card</h3><p>Land on a purple space and pull a card!</p></div>
+    <button class="secondary full" id="drawBtn" disabled style="margin-top:10px">PULL A CARD</button>
+  </section>
+  <section class="panel">
+    <h3 style="margin:2px 0 8px">How to play</h3>
+    <div class="rules">
+      <b>1.</b> Players take turns rolling.<br>
+      <b>2.</b> Odd rolls (1, 3, 5) are RED: go back 3 spaces.<br>
+      <b>3.</b> Even rolls (2, 4, 6) are GREEN: move forward the number rolled.<br>
+      <b>4.</b> Tap a glowing destination space to move. You must land exactly on HOME.<br>
+      <b>5.</b> Purple spaces mean pull a chance card. Follow its instruction.<br>
+      <b>6.</b> First player to reach HOME wins!
+    </div>
+    <button class="secondary full" id="newBtn" style="margin-top:12px">NEW GAME</button>
+  </section>
+</aside>
+</main>
+<div class="overlay" id="overlay"><div class="modal"><h2 id="winTitle">You're home!</h2><p id="winText"></p><button id="playAgain">PLAY AGAIN</button></div></div>
+<script>
+const FINISH=40;
+const special={
+  5:['bonus','🍀','LUCKY'],9:['card','🃏','CARD'],13:['trouble','🚧','DETOUR'],17:['card','🃏','CARD'],
+  21:['bonus','✨','LUCKY'],25:['card','🃏','CARD'],29:['trouble','⏰','LATE'],33:['card','🃏','CARD'],
+  37:['bonus','🚗','LUCKY']
+};
+const cards=[
+ {t:'Someone paid your car note!',d:'Advance 2 spaces.',m:2},
+ {t:'You pulled up to the movies, but got called into work.',d:'Go back 2 spaces.',m:-2},
+ {t:'Your friend brought you a plate. No cooking tonight!',d:'Advance 3 spaces.',m:3},
+ {t:'Flat tire! You have to wait for roadside assistance.',d:'Go back 3 spaces.',m:-3},
+ {t:'You found money in an old jacket pocket!',d:'Advance 2 spaces.',m:2},
+ {t:'The train crossing gates came down right in front of you.',d:'Miss your next turn.',skip:true},
+ {t:'Your boss let you leave early. Beat the traffic!',d:'Advance 3 spaces.',m:3},
+ {t:'You forgot something and had to turn around.',d:'Go back 2 spaces.',m:-2},
+ {t:'A neighbor gave you a shortcut tip.',d:'Advance 1 space.',m:1},
+ {t:'You got stuck behind a slow-moving delivery truck.',d:'Go back 1 space.',m:-1},
+ {t:'Your gas tank was already full. One less stop!',d:'Advance 2 spaces.',m:2},
+ {t:'You had to make an unexpected grocery run.',d:'Go back 2 spaces.',m:-2}
+];
+let positions=[0,0],turn=0,rolled=null,legal=[],pendingCard=false,skip=[false,false],gameOver=false,lastCard=null;
+const board=document.getElementById('board'),dice=document.getElementById('dice'),status=document.getElementById('status'),rollBtn=document.getElementById('rollBtn'),drawBtn=document.getElementById('drawBtn'),moveHint=document.getElementById('moveHint');
+function makeBoard(){
+ board.innerHTML='';
+ // 40 spaces in a serpentine path, with start and home included in the 8x6 grid.
+ const order=[];
+ for(let r=0;r<6;r++){let cols=[0,1,2,3,4,5,6,7];if(r%2)cols.reverse();cols.forEach(c=>order.push([r,c]));}
+ order.forEach(([r,c],i)=>{
+  const n=i===0?0:i===47?FINISH:Math.round(i*FINISH/47);
+  const s=document.createElement('button');s.type='button';s.className='space';s.dataset.pos=n;
+  let spec=special[n];
+  if(n===0){s.classList.add('home');s.innerHTML='<span class="num">START</span><span class="emoji">🚦</span><span class="kind">START</span>'}
+  else if(n===FINISH){s.classList.add('home');s.innerHTML='<span class="num">40</span><span class="emoji">🏠</span><span class="kind">HOME</span>'}
+  else if(spec){s.classList.add(spec[0]==='card'?'card-space':spec[0]);s.innerHTML=`<span class="num">${n}</span><span class="emoji">${spec[1]}</span><span class="kind">${spec[2]}</span>`}
+  else s.innerHTML=`<span class="num">${n}</span><span class="emoji">${n%5===0?'🚗':'•'}</span><span class="kind">${n%5===0?'ROAD':'SPACE'}</span>`;
+  s.addEventListener('click',()=>chooseSpace(n));board.appendChild(s);
+ });
+}
+function render(){
+ document.querySelectorAll('.space').forEach(s=>{
+  s.classList.toggle('current-target',legal.includes(+s.dataset.pos));
+  s.querySelector('.tokens')?.remove();
+  const p=+s.dataset.pos, holders=[];
+  positions.forEach((v,i)=>{if(v===p)holders.push(i)});
+  if(holders.length){const t=document.createElement('div');t.className='tokens';holders.forEach(i=>{const dot=document.createElement('span');dot.className='token '+(i?'p2':'p1');t.appendChild(dot)});s.appendChild(t)}
+ });
+ [0,1].forEach(i=>{
+  const el=document.getElementById('player'+(i+1));el.classList.toggle('active',turn===i&&!gameOver);
+  el.querySelector('small').textContent=`${positions[i]===0?'Start':positions[i]===FINISH?'Home':`Space ${positions[i]}`} / ${FINISH}`;
+ });
+ rollBtn.disabled=rolled!==null||gameOver||pendingCard;
+ drawBtn.disabled=!pendingCard||gameOver;
+}
+function message(t){status.textContent=t}
+function roll(){
+ if(rolled!==null||gameOver||pendingCard)return;
+ if(skip[turn]){skip[turn]=false;message(`Player ${turn+1} misses this turn. Player ${2-turn} is up!`);turn=1-turn;render();return}
+ const value=1+Math.floor(Math.random()*6);rolled=value;
+ dice.textContent=value;dice.className='dice '+(value%2?'red':'green');
+ const target=value%2?Math.max(0,positions[turn]-3):Math.min(FINISH,positions[turn]+value);
+ legal=[target];render();
+ if(value%2)message(`RED ${value}! Odd roll — go BACK 3 spaces to ${target}.`);
+ else message(`GREEN ${value}! Even roll — move FORWARD ${value} spaces to ${target}.`);
+ moveHint.textContent='Tap the glowing space on the board to move your piece.';
+}
+function chooseSpace(n){
+ if(!legal.includes(n)||rolled===null||gameOver)return;
+ positions[turn]=n;rolled=null;legal=[];
+ if(n===FINISH){gameOver=true;document.getElementById('winTitle').textContent=`PLAYER ${turn+1} IS HOME!`;document.getElementById('winText').textContent='You made it home first. Congratulations!';document.getElementById('overlay').classList.add('show');message(`Player ${turn+1} wins!`);render();return}
+ if(special[n]?.[0]==='card'){pendingCard=true;message(`Player ${turn+1} landed on a CARD space. Pull a card!`);moveHint.textContent='Tap PULL A CARD to reveal your surprise.'}
+ else if(special[n]?.[0]==='bonus'){message('Lucky break! Your move is complete.');endTurn()}
+ else if(special[n]?.[0]==='trouble'){message('A road setback! Your move is complete.');endTurn()}
+ else{message(`Player ${turn+1} moved to space ${n}.`);endTurn()}
+ render();
+}
+function pullCard(){
+ if(!pendingCard||gameOver)return;
+ let c;do{c=cards[Math.floor(Math.random()*cards.length)]}while(cards.length>1&&c===lastCard);lastCard=c;
+ document.getElementById('card').innerHTML=`<h3>Chance card</h3><p>${c.t}<br><span style="color:#a06d0b">${c.d}</span></p>`;
+ pendingCard=false;
+ if(c.skip){skip[turn]=true;message(`Player ${turn+1}: ${c.t} ${c.d}`)}
+ else{positions[turn]=Math.max(0,Math.min(FINISH,positions[turn]+c.m));message(`Player ${turn+1}: ${c.t} ${c.d}`)}
+ if(positions[turn]===FINISH){gameOver=true;document.getElementById('winTitle').textContent=`PLAYER ${turn+1} IS HOME!`;document.getElementById('winText').textContent='A lucky chance card got you home!';document.getElementById('overlay').classList.add('show')}
+ else endTurn();
+ render();
+}
+function endTurn(){turn=1-turn;rolled=null;legal=[];dice.textContent='?';dice.className='dice';moveHint.textContent='Roll the dice, then tap the glowing destination space.';render()}
+function reset(){
+ positions=[0,0];turn=0;rolled=null;legal=[];pendingCard=false;skip=[false,false];gameOver=false;lastCard=null;
+ dice.textContent='?';dice.className='dice';document.getElementById('card').innerHTML='<h3>Chance card</h3><p>Land on a purple space and pull a card!</p>';
+ document.getElementById('overlay').classList.remove('show');message('Player 1, roll the dice to begin!');moveHint.textContent='After rolling, tap one of the glowing spaces to move your piece.';render();
+}
+rollBtn.addEventListener('click',roll);drawBtn.addEventListener('click',pullCard);document.getElementById('newBtn').addEventListener('click',reset);document.getElementById('playAgain').addEventListener('click',reset);
+makeBoard();reset();
+</script>
+</body>
+</html>

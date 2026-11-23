@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Valentina Crazy Bingo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monoton&display=swap">
+<style>
+:root{
+  --bg:#07040f; --panel:#120a24; --ink:#f4eaff; --muted:#9a8bb8;
+  --pink:#ff2bd6; --cyan:#19f3ff; --lime:#b6ff3b; --amber:#ffb02e;
+  color-scheme:dark;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#07040f;}}
+:root[data-theme="dark"]{--bg:#07040f;}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% -10%,#2a0b4d,var(--bg) 60%);background-color:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Gill Sans",Verdana,sans-serif;display:flex;justify-content:center;padding:18px 12px 28px}
+main{width:100%;max-width:440px}
+h1{font-family:Monoton,"Arial Black",Impact,sans-serif;font-weight:400;font-size:2.3rem;margin:0 0 10px;text-align:center;color:var(--pink);text-shadow:0 0 6px var(--pink),0 0 18px var(--pink),0 0 40px #b0009a;animation:flicker 5s infinite}
+@keyframes flicker{0%,18%,22%,60%,64%,100%{opacity:1}20%,62%{opacity:.55}}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.stat{font-size:.78rem;color:var(--muted)}
+.stat b{display:block;font-size:1.5rem;color:var(--lime);text-shadow:0 0 8px var(--lime);font-variant-numeric:tabular-nums}
+.stat.r{text-align:right}.stat.r b{color:var(--cyan);text-shadow:0 0 8px var(--cyan)}
+.timer{height:10px;border-radius:6px;background:#241545;overflow:hidden;margin-bottom:12px;box-shadow:0 0 0 1px #3a2370}
+.timer i{display:block;height:100%;width:100%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);transition:width .1s linear,background .3s}
+.timer.low i{background:var(--pink);box-shadow:0 0 14px var(--pink)}
+.caller{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ball{width:84px;height:84px;border-radius:50%;border:4px solid var(--amber);box-shadow:0 0 18px var(--amber),inset 0 0 14px rgba(255,176,46,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--amber);text-shadow:0 0 10px var(--amber);flex:none}
+.ball small{font-size:.9rem;line-height:1}.ball b{font-size:2.2rem;line-height:1}
+.ball.new{animation:drop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes drop{from{transform:scale(.2) translateY(-30px);opacity:0}}
+.recent{display:flex;gap:6px;flex-wrap:wrap}
+.recent span{font-size:.8rem;padding:3px 7px;border-radius:12px;border:1px solid #4a2f8a;color:var(--muted)}
+.card{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:12px;border-radius:16px;background:var(--panel);border:2px solid var(--pink);box-shadow:0 0 16px rgba(255,43,214,.55),inset 0 0 18px rgba(255,43,214,.15)}
+.hd{text-align:center;font:bold 1.4rem "Trebuchet MS",sans-serif;color:var(--cyan);text-shadow:0 0 8px var(--cyan)}
+.cell{position:relative;aspect-ratio:1;border-radius:10px;border:2px solid #3a2370;background:#1a0f33;color:var(--ink);font:bold 1.35rem "Trebuchet MS",sans-serif;cursor:pointer;padding:0;transition:box-shadow .15s,border-color .15s}
+.cell.called{border-color:var(--lime);box-shadow:0 0 10px var(--lime);animation:beckon .9s ease-in-out infinite alternate}
+@keyframes beckon{to{box-shadow:0 0 20px var(--lime),inset 0 0 8px rgba(182,255,59,.5)}}
+.cell.marked{animation:none;background:var(--pink);border-color:#ffd0f6;color:#fff;text-shadow:0 0 8px #fff;box-shadow:0 0 14px var(--pink),inset 0 0 10px rgba(255,255,255,.4)}
+.cell.pop{animation:cellpop .45s}
+@keyframes cellpop{0%{transform:scale(1)}35%{transform:scale(1.35) rotate(-4deg)}100%{transform:scale(1)}}
+.cell.line{background:var(--cyan);border-color:#d6fcff;color:#06323a;text-shadow:none;box-shadow:0 0 18px var(--cyan)}
+.cell.shake{animation:shake .3s;border-color:var(--amber)}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fly{position:fixed;z-index:50;pointer-events:none;display:flex;align-items:center;justify-content:center;font:bold 1.6rem "Trebuchet MS",sans-serif;color:#fff;text-shadow:0 0 10px var(--pink),0 0 24px var(--pink);animation:fly .7s ease-out forwards}
+.fly::before{content:"";position:absolute;inset:0;border-radius:50%;border:3px solid var(--pink);box-shadow:0 0 14px var(--pink);animation:ring .7s ease-out forwards}
+@keyframes fly{to{transform:translateY(-46px) scale(2.4);opacity:0}}
+@keyframes ring{to{transform:scale(2.2);opacity:0}}
+.msg{min-height:3em;margin:12px 0;text-align:center;font-size:1.05rem;display:flex;align-items:center;justify-content:center}
+.msg.win{color:var(--lime);text-shadow:0 0 10px var(--lime);font-weight:bold}
+.go{width:100%;padding:16px;border-radius:14px;border:2px solid var(--cyan);background:transparent;color:var(--cyan);font:bold 1.2rem "Trebuchet MS",sans-serif;cursor:pointer;text-shadow:0 0 8px var(--cyan);box-shadow:0 0 14px rgba(25,243,255,.5),inset 0 0 14px rgba(25,243,255,.2)}
+.go:disabled{opacity:.4;cursor:not-allowed}
+.go:focus-visible,.cell:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.rules{margin-top:14px;font-size:.82rem;color:var(--muted);line-height:1.5}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Valentina Crazy Bingo</h1>
+  <div class="top">
+    <div class="stat">Coins<b id="coins">2,000</b></div>
+    <div class="stat r">Time left<b id="time">45</b></div>
+  </div>
+  <div class="timer" id="bar"><i id="fill"></i></div>
+  <div class="caller">
+    <div class="ball" id="ball"><small>&nbsp;</small><b>--</b></div>
+    <div class="recent" id="recent" aria-label="Recent calls"></div>
+  </div>
+  <div class="card" id="card" aria-label="Bingo card"></div>
+  <div class="msg" id="msg" aria-live="polite">Buy a card to start the clock.</div>
+  <button class="go" id="go">Buy card — 100 coins</button>
+  <p class="rules">Numbers are called every 1.5 seconds. Tap a glowing number on your card to mark it before the round ends. Each completed row, column or diagonal pays 250 coins. Fill the whole card for 2,000. The center is free.</p>
+</main>
+<script>
+(function(){
+  var START=2000,COST=100,LINE=250,FULL=2000,ROUND=45000,EVERY=1500,LET="BINGO";
+  var coins=START,playing=false,cells=[],marked,called,paid,seq,drawI,t0,drawT,tickT,net;
+  try{var s=parseInt(localStorage.getItem("neon-bingo-coins"),10);if(s>=0&&!isNaN(s))coins=s;}catch(e){}
+  var $=function(i){return document.getElementById(i);};
+  var fmt=function(n){return n.toLocaleString("en-US");};
+  var LINES=[];
+  for(var i=0;i<5;i++){var r=[],c=[];for(var j=0;j<5;j++){r.push(i*5+j);c.push(j*5+i);}LINES.push(r,c);}
+  LINES.push([0,6,12,18,24],[4,8,12,16,20]);
+
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function save(){try{localStorage.setItem("neon-bingo-coins",String(coins));}catch(e){}}
+  function render(){
+    $("coins").textContent=fmt(coins);
+    var broke=coins<COST&&!playing;
+    $("go").disabled=playing||false;
+    $("go").textContent=playing?"Round in progress":(broke?"Out of coins — reset to 2,000":"Buy card — "+COST+" coins");
+  }
+
+  function buildCard(){
+    var card=$("card");card.innerHTML="";cells=[];
+    for(var k=0;k<5;k++){var h=document.createElement("div");h.className="hd";h.textContent=LET[k];card.appendChild(h);}
+    var cols=[];
+    for(var c=0;c<5;c++){var pool=[];for(var n=1;n<=12;n++)pool.push(c*12+n);cols.push(shuffle(pool).slice(0,5));}
+    for(var r=0;r<5;r++)for(var c2=0;c2<5;c2++){
+      var idx=r*5+c2,b=document.createElement("button");
+      b.className="cell";b.type="button";
+      var free=idx===12;
+      b.dataset.n=free?0:cols[c2][r];
+      b.textContent=free?"★":cols[c2][r];
+      if(free){b.classList.add("marked");}
+      b.addEventListener("click",function(e){press(e.currentTarget);});
+      card.appendChild(b);cells.push(b);
+    }
+  }
+
+  function start(){
+    if(playing)return;
+    if(coins<COST){coins=START;save();render();$("msg").textContent="Coins reset to 2,000.";return;}
+    coins-=COST;net=-COST;playing=true;
+    marked={12:true};called={};paid={};seq=shuffle(Array.apply(null,{length:60}).map(function(_,i){return i+1;}));drawI=0;
+    buildCard();$("recent").innerHTML="";
+    $("ball").innerHTML="<small>&nbsp;</small><b>--</b>";
+    $("msg").className="msg";$("msg").textContent="Go! Tap the glowing numbers.";
+    t0=Date.now();render();save();
+    draw();
+    drawT=setInterval(draw,EVERY);
+    tickT=setInterval(tick,100);
+  }
+
+  function draw(){
+    if(drawI>=seq.length)return;
+    var n=seq[drawI++];called[n]=true;
+    var ball=$("ball");
+    ball.innerHTML="<small>"+LET[Math.floor((n-1)/12)]+"</small><b>"+n+"</b>";
+    ball.classList.remove("new");void ball.offsetWidth;ball.classList.add("new");
+    var sp=document.createElement("span");sp.textContent=LET[Math.floor((n-1)/12)]+n;
+    var rc=$("recent");rc.insertBefore(sp,rc.firstChild);while(rc.children.length>5)rc.removeChild(rc.lastChild);
+    cells.forEach(function(c){if(+c.dataset.n===n)c.classList.add("called");});
+  }
+
+  function tick(){
+    var left=Math.max(0,ROUND-(Date.now()-t0));
+    $("time").textContent=Math.ceil(left/1000);
+    $("fill").style.width=(left/ROUND*100)+"%";
+    $("bar").classList.toggle("low",left<10000);
+    if(left<=0)end();
+  }
+
+  function press(el){
+    if(!playing)return;
+    var n=+el.dataset.n,idx=cells.indexOf(el);
+    if(n===0||marked[idx])return;
+    if(!called[n]){el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");return;}
+    marked[idx]=true;
+    el.classList.remove("called");el.classList.add("marked","pop");
+    fly(el,n);
+    check();
+  }
+
+  function fly(el,n){
+    var r=el.getBoundingClientRect(),f=document.createElement("div");
+    f.className="fly";f.textContent=n;
+    f.style.left=r.left+"px";f.style.top=r.top+"px";f.style.width=r.width+"px";f.style.height=r.height+"px";
+    document.body.appendChild(f);setTimeout(function(){f.remove();},750);
+  }
+
+  function check(){
+    var got=0;
+    LINES.forEach(function(L,i){
+      if(paid[i])return;
+      if(L.every(function(x){return marked[x];})){
+        paid[i]=true;got+=LINE;
+        L.forEach(function(x){cells[x].classList.add("line");});
+      }
+    });
+    var full=Object.keys(marked).length===25;
+    if(full)got+=FULL;
+    if(got>0){
+      coins+=got;net+=got;save();render();
+      var m=$("msg");m.className="msg win";
+      m.textContent=full?"BLACKOUT! +"+fmt(got)+" coins":"BINGO! +"+fmt(got)+" coins";
+    }
+    if(full)end();
+  }
+
+  function end(){
+    if(!playing)return;
+    playing=false;clearInterval(drawT);clearInterval(tickT);
+    $("time").textContent="0";$("fill").style.width="0%";
+    var m=$("msg"),lines=Object.keys(paid).length;
+    m.className="msg"+(net>0?" win":"");
+    m.textContent="Time’s up. "+lines+(lines===1?" line":" lines")+", net "+(net>=0?"+":"")+fmt(net)+" coins.";
+    cells.forEach(function(c){c.classList.remove("called");});
+    render();
+  }
+
+  $("go").addEventListener("click",start);
+  buildCard();render();
+  if(coins<COST){$("msg").textContent="Out of coins. Press the button to reset to 2,000.";$("go").disabled=false;$("go").textContent="Out of coins — reset to 2,000";}
+})();
+</script>
+</body>
+</html>
